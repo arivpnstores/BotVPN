@@ -4,6 +4,7 @@
 servers=(
   "vvip.wintunneling.web.id"
   "premium.wintunneling.web.id"
+  "premium.windratuneup.my.id"
 )
 
 # Daftar port yang ingin dicek
