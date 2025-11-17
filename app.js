@@ -1779,67 +1779,6 @@ bot.on('text', async (ctx) => {
     });
   }
 //
-    if (state.step.startsWith('username_trial_')) {
-  const username = text;
-
-  // Validasi username
-  if (!/^[a-z0-9]{3,20}$/.test(username)) {
-    return ctx.reply('❌ *Username tidak valid. Gunakan huruf kecil dan angka (3–20 karakter).*', { parse_mode: 'Markdown' });
-  }
-
- const resselDbPath = './ressel.db';
-const idUser = ctx.from.id.toString().trim();
-
-// Baca file reseller
-fs.readFile(resselDbPath, 'utf8', async (err, data) => {
-  if (err) {
-    logger.error('❌ Gagal membaca file ressel.db:', err.message);
-    return ctx.reply('❌ *Terjadi kesalahan saat membaca data reseller.*', { parse_mode: 'Markdown' });
-  }
-
-  const resselList = data.split('\n').map(line => line.trim()).filter(Boolean);
-  const isRessel = resselList.includes(idUser);
-
-  // Cek jika bukan reseller, maka periksa apakah sudah pernah trial hari ini
-  if (!isRessel) {
-    const sudahPakai = await checkTrialAccess(ctx.from.id);
-    if (sudahPakai) {
-      return ctx.reply('❌ *Anda sudah menggunakan fitur trial hari ini. Silakan coba lagi besok.*', { parse_mode: 'Markdown' });
-    }
-  }
-
-    // Lanjut buat trial
-    const { type, serverId } = state;
-    delete userState[ctx.chat.id];
-
-    try {
-      const password = 'none', exp = 'none', iplimit = 'none';
-
-      const delFunctions = {
-        vmess: trialvmess,
-        vless: trialvless,
-        trojan: trialtrojan,
-        shadowsocks: trialshadowsocks,
-        ssh: trialssh
-      };
-
-      if (delFunctions[type]) {
-        const msg = await delFunctions[type](username, password, exp, iplimit, serverId);
-        //await recordAccountTransaction(ctx.from.id, type);
-        //await saveTrialAccess(ctx.from.id); // Simpan tanggal trial
-        //await checkTrialAccess(ctx.from.id);
-        await ctx.reply(msg, { parse_mode: 'Markdown' });
-        logger.info(`✅ Trial ${type} oleh ${ctx.from.id}`);
-      }
-
-    } catch (err) {
-      logger.error('❌ Gagal hapus akun:', err.message);
-      await ctx.reply('❌ *Terjadi kesalahan saat menghapus akun.*', { parse_mode: 'Markdown' });
-    }
-  });
-  return;
-}
-
     if (state.step.startsWith('username_unlock_')) {
     const username = text;
     // Validasi username (hanya huruf kecil dan angka, 3-20 karakter)
