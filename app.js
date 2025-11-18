@@ -1779,7 +1779,7 @@ bot.on('text', async (ctx) => {
     });
   }
 //
-    if (state.step.startsWith('username_unlock_')) {
+    if (state.step?.startsWith('username_unlock_')) {
     const username = text;
     // Validasi username (hanya huruf kecil dan angka, 3-20 karakter)
     if (!/^[a-z0-9]{3,20}$/.test(username)) {
@@ -1833,7 +1833,7 @@ bot.on('text', async (ctx) => {
     }});
     return; // Penting! Jangan lanjut ke case lain
   }
-    if (state.step.startsWith('username_lock_')) {
+    if (state.step?.startsWith('username_lock_')) {
     const username = text;
     // Validasi username (hanya huruf kecil dan angka, 3-20 karakter)
     if (!/^[a-z0-9]{3,20}$/.test(username)) {
@@ -1887,7 +1887,7 @@ bot.on('text', async (ctx) => {
     }});
     return; // Penting! Jangan lanjut ke case lain
   }
-  if (state.step.startsWith('username_del_')) {
+  if (state.step?.startsWith('username_del_')) {
     const username = text;
     // Validasi username (hanya huruf kecil dan angka, 3-20 karakter)
     if (!/^[a-z0-9]{3,20}$/.test(username)) {
@@ -1941,7 +1941,7 @@ bot.on('text', async (ctx) => {
     }});
     return; // Penting! Jangan lanjut ke case lain
   }
-  if (state.step.startsWith('username_')) {
+  if (state.step?.startsWith('username_')) {
     state.username = text;
 
     if (!state.username) {
@@ -1969,7 +1969,7 @@ bot.on('text', async (ctx) => {
       state.step = `exp_${state.action}_${state.type}`;
       await ctx.reply('⏳ *Masukkan masa aktif (hari):*', { parse_mode: 'Markdown' });
     }
-  } else if (state.step.startsWith('password_')) {
+  } else if (state.step?.startsWith('password_')) {
     state.password = ctx.message.text.trim();
     if (!state.password) {
       return ctx.reply('❌ *Password tidak valid. Masukkan password yang valid.*', { parse_mode: 'Markdown' });
@@ -1982,7 +1982,7 @@ bot.on('text', async (ctx) => {
     }
     state.step = `exp_${state.action}_${state.type}`;
     await ctx.reply('⏳ *Masukkan masa aktif (hari):*', { parse_mode: 'Markdown' });
-  } else if (state.step.startsWith('exp_')) {
+  } else if (state.step?.startsWith('exp_')) {
     const expInput = ctx.message.text.trim();
     if (!/^\d+$/.test(expInput)) {
       return ctx.reply('❌ *Masa aktif tidak valid. Masukkan angka yang valid.*', { parse_mode: 'Markdown' });
