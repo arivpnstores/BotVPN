@@ -47,6 +47,7 @@ ganti txt hasil seniff anda
 
 ## TAMPILAN SC BotVPN POTATO 
 <img src="./ss2.png" alt="image" width="300"/>
-kasih uang jajan : https://serverpremium.web.id/payment/
+NOTE : admin tidak menjual source bot ini, free gratis untuk kalian karena devloper asli nya juga tidak di jual belikan, anda membeli script BotVPN sc potato = anda di tipu, sekian terima gaji :)
+kasih uang jajan : https://rajaserverpremium.web.id/payment/
 
 Owner : https://t.me/ARI_VPN_STORE

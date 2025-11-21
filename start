@@ -182,7 +182,7 @@ EOF
 cat >/etc/cron.d/backup_sellvpn <<'EOF'
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-0 0 * * * root /usr/bin/backup_sellvpn
+0 * * * * root /usr/bin/backup_sellvpn
 EOF
 
 chmod +x /usr/bin/backup_sellvpn
