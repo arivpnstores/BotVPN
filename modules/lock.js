@@ -44,6 +44,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Lock SSH Account Success!*
 
 🔄 *Akun berhasil dikunci*
@@ -100,6 +101,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Lock VMess Account Success!*
 
 🔄 *Akun berhasil dikunci*
@@ -156,6 +158,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Lock VLESS Account Success!*
 
 🔄 *Akun berhasil dikunci*
@@ -212,6 +215,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Lock TROJAN Account Success!*
 
 🔄 *Akun berhasil dikunci*

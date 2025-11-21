@@ -44,6 +44,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Delete SSH Account Success!*
 
 🔄 *Akun berhasil dihapus*
@@ -100,6 +101,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Delete VMess Account Success!*
 
 🔄 *Akun berhasil dihapus*
@@ -156,6 +158,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Delete VLESS Account Success!*
 
 🔄 *Akun berhasil dihapus*
@@ -212,6 +215,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Delete TROJAN Account Success!*
 
 🔄 *Akun berhasil dihapus*

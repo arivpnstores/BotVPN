@@ -47,6 +47,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 3 && exp <= 135) {
   db.run(
@@ -127,6 +128,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 3 && exp <= 135) {
   db.run(
@@ -208,6 +210,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 3 && exp <= 135) {
   db.run(
@@ -289,6 +292,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 3 && exp <= 135) {
   db.run(

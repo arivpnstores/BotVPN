@@ -48,6 +48,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 3 && exp <= 135) {
   db.run(
@@ -71,13 +72,14 @@ if (exp >= 3 && exp <= 135) {
 *🔐 SSH Premium Details*
 ────────────────────────
 📡 *SSH WS*       : \`${s.hostname}:80@${s.username}:${s.password}\`
-🔒 *SSH SSL*      : \`${s.hostname}:443@${s.username}:${s.password}\`
-📶 *SSH UDP*      : \`${s.hostname}:1-65535@${s.username}:${s.password}\`
-🌐 *DNS SELOW*    : \`${s.hostname}:5300@${s.username}:${s.password}\`
+🔒 *SSH SSL*      : \`ssl-${s.hostname}:443@${s.username}:${s.password}\`
+📶 *SSH UDP*      : \`udp-${s.hostname}:1-65535@${s.username}:${s.password}\`
+🌐 *DNS SELOW*    : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
 ────────────────────────
 🌍 *Hostname*     : \`${s.hostname}\`
 👤 *Username*     : \`${s.username}\`
 🔑 *Password*     : \`${s.password}\`
+🗝️ *Public Key*  : \`${s.pubkey ? s.pubkey : "-"}\`
 📅 *Expiry Date*  : \`${s.exp}\`
 ⏰ *Expiry Time*  : \`${s.time}\`
 📌 *IP Limit*     : \`${LIMIT_IP}\`
@@ -166,6 +168,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 3 && exp <= 135) {
   db.run(
@@ -277,6 +280,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 3 && exp <= 135) {
   db.run(
@@ -386,6 +390,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         }
 
         const s = d.data;
+        console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 3 && exp <= 135) {
   db.run(
