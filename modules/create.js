@@ -76,9 +76,9 @@ if (exp >= 1 && exp <= 135) {
 📶 *SSH UDP*   : \`udp-${s.hostname}:1-65535@${s.username}:${s.password}\`
 🌐 *DNS SELOW* : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
 ────────────────────────
-🌍 *Host*         : ${s.hostname}
-🏢 *ISP*          : ${s.ISP}
-🏙️ *City*         : ${s.CITY}
+🌍 *Host*         : \`${s.hostname}\`
+🏢 *ISP*          : \`${s.ISP}\`
+🏙️ *City*         : \`${s.CITY}\`
 🌍 *Hostname*     : \`${s.hostname}\`
 👤 *Username*     : \`${s.username}\`
 🔑 *Password*     : \`${s.password}\`
@@ -202,9 +202,9 @@ if (exp >= 1 && exp <= 135) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
-🏢 *ISP*          : ${s.ISP}
-🏙️ *City*         : ${s.CITY}
-🛡 *UUID*         : \`${s.uuid}\`
+🏢 *ISP*          : \`${s.ISP}\`
+🏙️ *City*         : \`${s.CITY}\`
+🛡 *UUID*          : \`${s.uuid}\`
 🧾 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
 🔢 *IP Limit*     : \`${LIMIT_IP === "0" ? "Unlimited" : LIMIT_IP} IP\`
@@ -319,8 +319,8 @@ if (exp >= 1 && exp <= 135) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
-🏢 *ISP*          : ${s.ISP}
-🏙️ *City*         : ${s.CITY}
+🏢 *ISP*          : \`${s.ISP}\`
+🏙️ *City*         : \`${s.CITY}\`
 🛡 *UUID*         : \`${s.uuid}\`
 📅 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
@@ -434,8 +434,8 @@ if (exp >= 1 && exp <= 135) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
-🏢 *ISP*          : ${s.ISP}
-🏙️ *City*         : ${s.CITY}
+🏢 *ISP*          : \`${s.ISP}\`
+🏙️ *City*         : \`${s.CITY}\`
 🔑 *Key*          : \`${s.uuid}\`
 📅 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`

@@ -60,8 +60,8 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 🌐 *DNS SELOW*    : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
 ────────────────────────
 🌍 *Host*         : \`${s.hostname}\`
-🏢 *ISP*          : ${s.ISP}
-🏙️ *City*         : ${s.CITY}
+🏢 *ISP*          : \`${s.ISP}\`
+🏙️ *City*         : \`${s.CITY}\`
 👤 *Username*     : \`${s.username}\`
 🔑 *Password*     : \`${s.password}\`
 🗝️ *Public Key*  : \`${s.pubkey ? s.pubkey : "-"}\`
@@ -168,8 +168,8 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
-🏢 *ISP*          : ${s.ISP}
-🏙️ *City*         : ${s.CITY}
+🏢 *ISP*          : \`${s.ISP}\`
+🏙️ *City*         : \`${s.CITY}\`
 🛡 *UUID*         : \`${s.uuid}\`
 🧾 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
@@ -268,8 +268,8 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
-🏢 *ISP*          : ${s.ISP}
-🏙️ *City*         : ${s.CITY}
+🏢 *ISP*          : \`${s.ISP}\`
+🏙️ *City*         : \`${s.CITY}\`
 🛡 *UUID*         : \`${s.uuid}\`
 📅 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
@@ -366,8 +366,8 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
-🏢 *ISP*          : ${s.ISP}
-🏙️ *City*         : ${s.CITY}
+🏢 *ISP*          : \`${s.ISP}\`
+🏙️ *City*         : \`${s.CITY}\`
 🔑 *Key*          : \`${s.uuid}\`
 📅 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
