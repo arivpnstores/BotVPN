@@ -49,7 +49,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 3 && exp <= 135) {
+if (exp >= 1 && exp <= 135) {
   db.run(
     'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
     [serverId],
@@ -130,7 +130,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 3 && exp <= 135) {
+if (exp >= 1 && exp <= 135) {
   db.run(
     'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
     [serverId],
@@ -212,7 +212,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 3 && exp <= 135) {
+if (exp >= 1 && exp <= 135) {
   db.run(
     'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
     [serverId],
@@ -294,7 +294,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 3 && exp <= 135) {
+if (exp >= 1 && exp <= 135) {
   db.run(
     'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
     [serverId],

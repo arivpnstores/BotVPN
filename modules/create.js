@@ -50,7 +50,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 3 && exp <= 135) {
+if (exp >= 1 && exp <= 135) {
   db.run(
     'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
     [serverId],
@@ -71,21 +71,24 @@ if (exp >= 3 && exp <= 135) {
 
 *🔐 SSH Premium Details*
 ────────────────────────
-📡 *SSH WS*       : \`${s.hostname}:80@${s.username}:${s.password}\`
-🔒 *SSH SSL*      : \`ssl-${s.hostname}:443@${s.username}:${s.password}\`
-📶 *SSH UDP*      : \`udp-${s.hostname}:1-65535@${s.username}:${s.password}\`
-🌐 *DNS SELOW*    : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
+📡 *SSH WS*    : \`${s.hostname}:80@${s.username}:${s.password}\`
+🔒 *SSH SSL*   : \`ssl-${s.hostname}:443@${s.username}:${s.password}\`
+📶 *SSH UDP*   : \`udp-${s.hostname}:1-65535@${s.username}:${s.password}\`
+🌐 *DNS SELOW* : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
 ────────────────────────
+🌍 *Host*         : ${s.hostname}
+🏢 *ISP*          : ${s.ISP}
+🏙️ *City*         : ${s.CITY}
 🌍 *Hostname*     : \`${s.hostname}\`
 👤 *Username*     : \`${s.username}\`
 🔑 *Password*     : \`${s.password}\`
-🗝️ *Public Key*  : \`${s.pubkey ? s.pubkey : "-"}\`
+🗝️ *Public Key*   : \`${s.pubkey ? s.pubkey : "-"}\`
 📅 *Expiry Date*  : \`${s.exp}\`
 ⏰ *Expiry Time*  : \`${s.time}\`
 📌 *IP Limit*     : \`${LIMIT_IP}\`
 ────────────────────────
 🛠 *Ports*:
-• TLS         : \`${s.port.tls}\`
+• TLS         : \`${s.port.tls}\` z
 • Non-TLS     : \`${s.port.none}\`
 • OVPN TCP    : \`${s.port.ovpntcp}\`
 • OVPN UDP    : \`${s.port.ovpnudp}\`
@@ -111,8 +114,14 @@ User-Agent: [ua]
 Upgrade: websocket
 \`
 
-📥 *Download Config*:
+📥 *Download Config Ovpn*:
 🔗 http://${s.hostname}:81/myvpn-config.zip
+
+📥 *Download All Config UNLOCK SSH*:
+🔗 http://${s.hostname}:81/config-indonesia.zip
+
+📥 *GRUP TESTIMOINI & BERBAGI BUG*:
+🔗 http://t.me/RAJA_VPN_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -170,7 +179,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 3 && exp <= 135) {
+if (exp >= 1 && exp <= 135) {
   db.run(
     'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
     [serverId],
@@ -193,6 +202,8 @@ if (exp >= 3 && exp <= 135) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
+🏢 *ISP*          : ${s.ISP}
+🏙️ *City*         : ${s.CITY}
 🛡 *UUID*         : \`${s.uuid}\`
 🧾 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
@@ -223,6 +234,9 @@ if (exp >= 3 && exp <= 135) {
 - AlterId     : \`0\`
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
+
+📥 *GRUP TESTIMOINI & BERBAGI BUG*:
+🔗 http://t.me/RAJA_VPN_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -282,7 +296,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 3 && exp <= 135) {
+if (exp >= 1 && exp <= 135) {
   db.run(
     'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
     [serverId],
@@ -305,6 +319,8 @@ if (exp >= 3 && exp <= 135) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
+🏢 *ISP*          : ${s.ISP}
+🏙️ *City*         : ${s.CITY}
 🛡 *UUID*         : \`${s.uuid}\`
 📅 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
@@ -334,6 +350,9 @@ if (exp >= 3 && exp <= 135) {
 ⚙️ *Settings*:
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
+
+📥 *GRUP TESTIMOINI & BERBAGI BUG*:
+🔗 http://t.me/RAJA_VPN_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -392,7 +411,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 3 && exp <= 135) {
+if (exp >= 1 && exp <= 135) {
   db.run(
     'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
     [serverId],
@@ -415,6 +434,8 @@ if (exp >= 3 && exp <= 135) {
 ──────────────
 👤 *Username*     : \`${s.username}\`
 🌍 *Host*         : \`${s.hostname}\`
+🏢 *ISP*          : ${s.ISP}
+🏙️ *City*         : ${s.CITY}
 🔑 *Key*          : \`${s.uuid}\`
 📅 *Expired*      : \`${s.expired}\` (${s.time})
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
@@ -440,6 +461,9 @@ if (exp >= 3 && exp <= 135) {
 ⚙️ *Settings*:
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
+
+📥 *GRUP TESTIMOINI & BERBAGI BUG*:
+🔗 http://t.me/RAJA_VPN_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
