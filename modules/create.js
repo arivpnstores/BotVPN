@@ -118,10 +118,10 @@ Upgrade: websocket
 🔗 http://${s.hostname}:81/myvpn-config.zip
 
 📥 *Download All Config UNLOCK SSH*:
-🔗 http://ssl-${s.hostname}:81/config-indonesia.zip
+🔗 http://ssl-${s.hostname}:81/config-Indonesia.zip
 
 📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA_VPN_STORE
+🔗 http://t.me/RAJA\_VPN\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -236,7 +236,7 @@ if (exp >= 1 && exp <= 135) {
 - Network     : \`ws, grpc, upgrade\`
 
 📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA_VPN_STORE
+🔗 http://t.me/RAJA\_VPN\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -352,7 +352,7 @@ if (exp >= 1 && exp <= 135) {
 - Network     : \`ws, grpc, upgrade\`
 
 📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA_VPN_STORE
+🔗 http://t.me/RAJA\_VPN\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -463,7 +463,7 @@ if (exp >= 1 && exp <= 135) {
 - Network     : \`ws, grpc, upgrade\`
 
 📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA_VPN_STORE
+🔗 http://t.me/RAJA\_VPN\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
