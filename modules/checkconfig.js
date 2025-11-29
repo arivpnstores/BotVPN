@@ -2,11 +2,12 @@ const axios = require('axios');
 const { exec } = require('child_process');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./sellvpn.db');
-async function createssh(username, password, exp, iplimit, serverId) {
-  console.log(`Creating SSH account for ${username} with expiry ${exp} days, IP limit ${iplimit}, and password ${password}`);
+
+async function checkconfigsshvpn(username, password, exp, iplimit, serverId) {
+  console.log(`Check config SSH account for ${username}`);
 
   // Validasi username
-if (!/^[a-z0-9-]+$/.test(username)) {
+  if (!/^[a-z0-9-]+$/.test(username)) {
     return '❌ Username tidak valid. Mohon gunakan hanya huruf dan angka tanpa spasi.';
   }
 
@@ -18,18 +19,13 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       }
 
       const domain = server.domain;
-      const param = `/vps/sshvpn`;
-      const web_URL = `http://${domain}${param}`; // misalnya: http://idnusastb.domain.web.id/vps/sshvpn
+      const web_URL = `http://${domain}/vps/checkconfigsshvpn/${username}`; // Contoh: http://domainmu.com/vps/checkconfigsshvpn/aristore
       const AUTH_TOKEN = server.auth;
-      const days = exp;
-      const KUOTA = "0"; // jika perlu di-hardcode, bisa diubah jadi parameter juga
       const LIMIT_IP = iplimit;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -s -X GET "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
--H "Content-Type: application/json" \
--H "Accept: application/json" \
--d '{"expired":${days},"kuota":"${KUOTA}","limitip":"${LIMIT_IP}","password":"${password}","username":"${username}"}'`;
+-H "accept: application/json"`;
 
       exec(curlCommand, (_, stdout) => {
         let d;
@@ -49,24 +45,6 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
-// ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 1 && exp <= 135) {
-  db.run(
-    'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
-    [serverId],
-    (err) => {
-      if (err) {
-        console.error('⚠️ Gagal update total_create_akun:', err.message);
-      } else {
-        console.log(`✅ total_create_akun diperbarui untuk serverId ${serverId} dengan exp ${exp}`);
-      }
-    }
-  );
-} else {
-  console.log(`⚠️ Exp ${exp} hari tidak dicatat (kurang dari 30 atau lebih dari 135)`);
-}
-// ======= SELESAI LOGIKA UPDATE =======
-
         const msg = `✅ *SSH Account Created Successfully!*
 
 *🔐 SSH Premium Details*
@@ -130,11 +108,11 @@ Upgrade: websocket
     });
   });
 }
-async function createvmess(username, exp, quota, limitip, serverId) {
-  console.log(`Creating VMess account for ${username} with expiry ${exp} days, quota ${quota} GB, IP limit ${limitip}`);
+async function checkconfigvmess(username, exp, quota, iplimit, serverId) {
+  console.log(`Check config VMess account for ${username}`);
 
   // Validasi username
-if (!/^[a-z0-9-]+$/.test(username)) {
+  if (!/^[a-z0-9-]+$/.test(username)) {
     return '❌ Username tidak valid. Mohon gunakan hanya huruf dan angka tanpa spasi.';
   }
 
@@ -146,18 +124,14 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       }
 
       const domain = server.domain;
-      const param = `/vps/vmessall`;
-      const web_URL = `http://${domain}${param}`; // contoh: http://idnusastb.domain.web.id/vps/vmess
+      const web_URL = `http://${domain}/vps/checkconfigvmess/${username}`; // contoh: http://domain.com/vps/checkconfigvmess/aristore
       const AUTH_TOKEN = server.auth;
-      const days = exp;
+      const LIMIT_IP = iplimit;
       const KUOTA = quota;
-      const LIMIT_IP = limitip;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+  const curlCommand = `curl -s -X GET "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
--H "Content-Type: application/json" \
--H "Accept: application/json" \
--d '{"expired":${days},"kuota":"${KUOTA}","limitip":"${LIMIT_IP}","username":"${username}"}'`;
+-H "accept: application/json"`;
 
       exec(curlCommand, (_, stdout) => {
         let d;
@@ -177,24 +151,6 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
-// ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 1 && exp <= 135) {
-  db.run(
-    'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
-    [serverId],
-    (err) => {
-      if (err) {
-        console.error('⚠️ Gagal update total_create_akun:', err.message);
-      } else {
-        console.log(`✅ total_create_akun diperbarui untuk serverId ${serverId} dengan exp ${exp}`);
-      }
-    }
-  );
-} else {
-  console.log(`⚠️ Exp ${exp} hari tidak dicatat (kurang dari 30 atau lebih dari 135)`);
-}
-// ======= SELESAI LOGIKA UPDATE =======
-
         const msg = `✅ *VMess Account Created Successfully!*
 
 🔐 *Akun VMess Premium*
@@ -204,7 +160,7 @@ if (exp >= 1 && exp <= 135) {
 🏢 *ISP*          : \`${s.ISP}\`
 🏙️ *City*         : \`${s.CITY}\`
 🛡 *UUID*          : \`${s.uuid}\`
-🧾 *Expired*      : \`${s.expired}\` (${s.time})
+🧾 *Expired*      : \`${s.expired}\` 
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
 🔢 *IP Limit*     : \`${LIMIT_IP === "0" ? "Unlimited" : LIMIT_IP} IP\`
 ──────────────
@@ -246,12 +202,11 @@ if (exp >= 1 && exp <= 135) {
     });
   });
 }
-
-async function createvless(username, exp, quota, limitip, serverId) {
-  console.log(`Creating VLESS account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
+async function checkconfigvless(username, exp, quota, iplimit, serverId) {
+  console.log(`Check config VLESS account for ${username}`);
 
   // Validasi username
-if (!/^[a-z0-9-]+$/.test(username)) {
+  if (!/^[a-z0-9-]+$/.test(username)) {
     return '❌ Username tidak valid. Mohon gunakan hanya huruf dan angka tanpa spasi.';
   }
 
@@ -263,18 +218,14 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       }
 
       const domain = server.domain;
-      const param = `/vps/vlessall`;
-      const web_URL = `http://${domain}${param}`; // Contoh: http://domainmu.com/vps/vless
+      const web_URL = `http://${domain}/vps/checkconfigvless/${username}`; // contoh: http://domain.com/vps/checkconfigvless/aristore
       const AUTH_TOKEN = server.auth;
-      const days = exp;
+      const LIMIT_IP = iplimit;
       const KUOTA = quota;
-      const LIMIT_IP = limitip;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+  const curlCommand = `curl -s -X GET "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
--H "Content-Type: application/json" \
--H "Accept: application/json" \
--d '{"expired":${days},"kuota":"${KUOTA}","limitip":"${LIMIT_IP}","username":"${username}"}'`;
+-H "accept: application/json"`;
 
       exec(curlCommand, (_, stdout) => {
         let d;
@@ -294,24 +245,6 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
-// ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 1 && exp <= 135) {
-  db.run(
-    'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
-    [serverId],
-    (err) => {
-      if (err) {
-        console.error('⚠️ Gagal update total_create_akun:', err.message);
-      } else {
-        console.log(`✅ total_create_akun diperbarui untuk serverId ${serverId} dengan exp ${exp}`);
-      }
-    }
-  );
-} else {
-  console.log(`⚠️ Exp ${exp} hari tidak dicatat (kurang dari 30 atau lebih dari 135)`);
-}
-// ======= SELESAI LOGIKA UPDATE =======
-
         const msg = `✅ *VLESS Account Created Successfully!*
 
 🔐 *Akun VLESS Premium*
@@ -321,7 +254,7 @@ if (exp >= 1 && exp <= 135) {
 🏢 *ISP*          : \`${s.ISP}\`
 🏙️ *City*         : \`${s.CITY}\`
 🛡 *UUID*         : \`${s.uuid}\`
-📅 *Expired*      : \`${s.expired}\` (${s.time})
+📅 *Expired*      : \`${s.expired}\` 
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
 🔢 *IP Limit*     : \`${LIMIT_IP === "0" ? "Unlimited" : LIMIT_IP} IP\`
 ──────────────
@@ -362,11 +295,11 @@ if (exp >= 1 && exp <= 135) {
     });
   });
 }
-async function createtrojan(username, exp, quota, limitip, serverId) {
-  console.log(`Creating Trojan account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
+async function checkconfigtrojan(username, exp, quota, iplimit, serverId) {
+  console.log(`Check config TROJAN account for ${username}`);
 
   // Validasi username
-if (!/^[a-z0-9-]+$/.test(username)) {
+  if (!/^[a-z0-9-]+$/.test(username)) {
     return '❌ Username tidak valid. Mohon gunakan hanya huruf dan angka tanpa spasi.';
   }
 
@@ -378,18 +311,14 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       }
 
       const domain = server.domain;
-      const param = `/vps/trojanall`;
-      const web_URL = `http://${domain}${param}`; // contoh: http://domainmu.com/vps/trojan
+      const web_URL = `http://${domain}/vps/checkconfigtrojan/${username}`; // contoh: http://domain.com/vps/checkconfigtrojan/aristore
       const AUTH_TOKEN = server.auth;
-      const days = exp;
+      const LIMIT_IP = iplimit;
       const KUOTA = quota;
-      const LIMIT_IP = limitip;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+  const curlCommand = `curl -s -X GET "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
--H "Content-Type: application/json" \
--H "Accept: application/json" \
--d '{"expired":${days},"kuota":"${KUOTA}","limitip":"${LIMIT_IP}","username":"${username}"}'`;
+-H "accept: application/json"`;
 
       exec(curlCommand, (_, stdout) => {
         let d;
@@ -409,24 +338,6 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
-// ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 1 && exp <= 135) {
-  db.run(
-    'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
-    [serverId],
-    (err) => {
-      if (err) {
-        console.error('⚠️ Gagal update total_create_akun:', err.message);
-      } else {
-        console.log(`✅ total_create_akun diperbarui untuk serverId ${serverId} dengan exp ${exp}`);
-      }
-    }
-  );
-} else {
-  console.log(`⚠️ Exp ${exp} hari tidak dicatat (kurang dari 30 atau lebih dari 135)`);
-}
-// ======= SELESAI LOGIKA UPDATE =======
-
         const msg = `✅ *Trojan Account Created Successfully!*
 
 🔐 *Akun TROJAN Premium*
@@ -436,7 +347,7 @@ if (exp >= 1 && exp <= 135) {
 🏢 *ISP*          : \`${s.ISP}\`
 🏙️ *City*         : \`${s.CITY}\`
 🔑 *Key*          : \`${s.uuid}\`
-📅 *Expired*      : \`${s.expired}\` (${s.time})
+📅 *Expired*      : \`${s.expired}\` 
 📦 *Quota*        : \`${KUOTA === "0" ? "Unlimited" : KUOTA} GB\`
 🔢 *IP Limit*     : \`${LIMIT_IP === "0" ? "Unlimited" : LIMIT_IP} IP\`
 ──────────────
@@ -473,88 +384,5 @@ if (exp >= 1 && exp <= 135) {
     });
   });
 }
-
-
-//create shadowsocks ga ada di potato
-async function createshadowsocks(username, exp, quota, limitip, serverId) {
-  console.log(`Creating Shadowsocks account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip} on server ${serverId}`);
   
-  // Validasi username
-if (!/^[a-z0-9-]+$/.test(username)) {
-    return '❌ Username tidak valid. Mohon gunakan hanya huruf dan angka tanpa spasi.';
-  }
-
-  // Ambil domain dari database
-  return new Promise((resolve, reject) => {
-    db.get('SELECT * FROM Server WHERE id = ?', [serverId], (err, server) => {
-      if (err) {
-        console.error('Error fetching server:', err.message);
-        return resolve('❌ Server tidak ditemukan. Silakan coba lagi.');
-      }
-
-      if (!server) return resolve('❌ Server tidak ditemukan. Silakan coba lagi.');
-
-      const domain = server.domain;
-      const auth = server.auth;
-      const param = `:5888/createshadowsocks?user=${username}&exp=${exp}&quota=${quota}&iplimit=${limitip}&auth=${auth}`;
-      const url = `http://${domain}${param}`;
-      axios.get(url)
-        .then(response => {
-          if (response.data.status === "success") {
-            const shadowsocksData = response.data.data;
-            const msg = `
-🌟 *AKUN SHADOWSOCKS PREMIUM* 🌟
-
-🔹 *Informasi Akun*
-┌─────────────────────
-│ *Username* : \`${shadowsocksData.username}\`
-│ *Domain*   : \`${shadowsocksData.domain}\`
-│ *NS*       : \`${shadowsocksData.ns_domain}\`
-│ *Port TLS* : \`443\`
-│ *Port HTTP*: \`80\`
-│ *Alter ID* : \`0\`
-│ *Security* : \`Auto\`
-│ *Network*  : \`Websocket (WS)\`
-│ *Path*     : \`/shadowsocks\`
-│ *Path GRPC*: \`shadowsocks-grpc\`
-└─────────────────────
-🔐 *URL SHADOWSOCKS TLS*
-\`\`\`
-${shadowsocksData.ss_link_ws}
-\`\`\`
-🔒 *URL SHADOWSOCKS GRPC*
-\`\`\`
-${shadowsocksData.ss_link_grpc}
-\`\`\`
-🔒 *PUBKEY*
-\`\`\`
-${shadowsocksData.pubkey}
-\`\`\`
-┌─────────────────────
-│ Expiry: \`${shadowsocksData.expired}\`
-│ Quota: \`${shadowsocksData.quota === '0 GB' ? 'Unlimited' : shadowsocksData.quota}\`
-│ IP Limit: \`${shadowsocksData.ip_limit === '0' ? 'Unlimited' : shadowsocksData.ip_limit} IP\`
-└─────────────────────
-Save Account Link: [Save Account](https://${shadowsocksData.domain}:81/shadowsocks-${shadowsocksData.username}.txt)
-✨ Selamat menggunakan layanan kami! ✨
-`;
-              console.log('Shadowsocks account created successfully');
-              return resolve(msg);
-            } else {
-              console.log('Error creating Shadowsocks account');
-              return resolve(`❌ Terjadi kesalahan: ${response.data.message}`);
-            }
-          })
-        .catch(error => {
-          console.error('Error saat membuat Shadowsocks:', error);
-          return resolve('❌ Terjadi kesalahan saat membuat Shadowsocks. Silakan coba lagi nanti.');
-        });
-    });
-  });
-}
-
-module.exports = { createssh, createvmess, createvless, createtrojan, createshadowsocks }; 
-
-
-
-
+module.exports = { checkconfigtrojan, checkconfigvless, checkconfigvmess, checkconfigsshvpn };
