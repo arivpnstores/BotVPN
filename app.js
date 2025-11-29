@@ -77,6 +77,20 @@ const {
   unlockshadowsocks 
 } = require('./modules/unlock');
 
+const { 
+  changelimipsshvpn, 
+  changelimipvmess, 
+  changelimipvless, 
+  changelimiptrojan
+} = require('./modules/change-ip');
+
+const { 
+  checkconfigsshvpn, 
+  checkconfigvmess, 
+  checkconfigvless, 
+  checkconfigtrojan
+} = require('./modules/checkconfig');
+
 const fsPromises = require('fs/promises');
 const path = require('path');
 const trialFile = path.join(__dirname, 'trial.db');
@@ -434,6 +448,10 @@ if (isReseller) {
       { text: '🔐 Buka Kunci Akun', callback_data: 'service_unlock' }
     ],
     [
+      { text: '🔀 Change Limit IP', callback_data: 'service_changelimip' },
+      { text: '📝 Check Config Akun', callback_data: 'service_checkconfig' }
+    ],
+    [
       { text: '⌛ Trial Akun', callback_data: 'service_trial' },
       { text: '💰 TopUp Saldo', callback_data: 'topup_saldo' }
     ]
@@ -596,6 +614,90 @@ bot.command('broadcast', async (ctx) => {
           { parse_mode: 'Markdown' }
       );
   });
+});
+
+bot.command('broadcastfoto', async (ctx) => {
+    const userId = ctx.message.from.id;
+    if (!adminIds.includes(userId)) {
+        return ctx.reply('⛔ Anda tidak punya izin.');
+    }
+
+    const replyMsg = ctx.message.reply_to_message;
+
+    // Cek apakah broadcast foto atau teks
+    let isPhoto = false;
+    let msgText = '';
+    let photoFileId = '';
+
+    if (replyMsg) {
+        if (replyMsg.photo) {
+            isPhoto = true;
+            // Ambil versi terbesar foto
+            photoFileId = replyMsg.photo[replyMsg.photo.length - 1].file_id;
+            msgText = replyMsg.caption || '';
+        } else if (replyMsg.text) {
+            msgText = replyMsg.text;
+        }
+    } else {
+        msgText = ctx.message.text.split(' ').slice(1).join(' ');
+    }
+
+    if (!msgText && !photoFileId) {
+        return ctx.reply('⚠️ Harap isi pesan broadcast atau reply foto.');
+    }
+
+    ctx.reply('📢 Broadcast dimulai...');
+
+    db.all("SELECT user_id FROM users", [], async (err, rows) => {
+        if (err) return ctx.reply('⚠️ Error ambil data user.');
+
+        let sukses = 0;
+        let gagal = 0;
+        let dihapus = 0;
+
+        const delay = 30; // ms
+
+        for (const row of rows) {
+            try {
+                if (isPhoto) {
+                    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                        chat_id: row.user_id,
+                        photo: photoFileId,
+                        caption: msgText
+                    });
+                } else {
+                    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        chat_id: row.user_id,
+                        text: msgText
+                    });
+                }
+
+                sukses++;
+
+            } catch (error) {
+                const code = error.response?.status;
+                gagal++;
+
+                if (code === 400 || code === 403) {
+                    db.run("DELETE FROM users WHERE user_id = ?", [row.user_id]);
+                    dihapus++;
+                    console.log(`🗑️ User invalid dihapus: ${row.user_id}`);
+                }
+
+                console.log(`❌ Gagal kirim ke ${row.user_id}: ${code}`);
+            }
+
+            await new Promise(r => setTimeout(r, delay));
+        }
+
+        ctx.reply(
+            `📣 *Broadcast selesai!*\n\n` +
+            `✔️ Berhasil: *${sukses}*\n` +
+            `❌ Gagal: *${gagal}*\n` +
+            `🗑️ User dihapus: *${dihapus}*`,
+            { parse_mode: 'Markdown' }
+        );
+    });
 });
 
 bot.command('addsaldo', async (ctx) => {
@@ -979,6 +1081,18 @@ async function handleServiceAction(ctx, action) {
       [{ text: 'Unlock Vmess', callback_data: 'unlock_vmess' }, { text: 'Unlock Vless', callback_data: 'unlock_vless' }],
       [{ text: 'Unlock Trojan', callback_data: 'unlock_trojan' }, { text: '🔙 Kembali', callback_data: 'send_main_menu' }],
     ];
+  } else if (action === 'changelimip') {
+    keyboard = [
+      [{ text: 'Change Limit Ssh/Ovpn', callback_data: 'changelimip_ssh' }],      
+      [{ text: 'Change Limit Vmess', callback_data: 'changelimip_vmess' }, { text: 'Change Limit Vless', callback_data: 'changelimip_vless' }],
+      [{ text: 'Change Limit Trojan', callback_data: 'changelimip_trojan' }, { text: '🔙 Kembali', callback_data: 'send_main_menu' }],
+    ];
+  } else if (action === 'checkconfig') {
+    keyboard = [
+      [{ text: 'Check Config Ssh/Ovpn', callback_data: 'checkconfig_ssh' }],      
+      [{ text: 'Check Config Vmess', callback_data: 'checkconfig_vmess' }, { text: 'Check Config Vless', callback_data: 'checkconfig_vless' }],
+      [{ text: 'Check Config Trojan', callback_data: 'checkconfig_trojan' }, { text: '🔙 Kembali', callback_data: 'send_main_menu' }],
+    ];
   } 
   try {
     await ctx.editMessageReplyMarkup({
@@ -1266,6 +1380,28 @@ bot.action('service_unlock', async (ctx) => {
   await handleServiceAction(ctx, 'unlock');
 });
 
+bot.action('service_changelimip', async (ctx) => {
+    if (!ctx || !ctx.match) {
+        return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+    }
+    // izin khusus admin
+    if (ctx.from.id.toString() !== adminIds) {
+        return ctx.reply('❌ *Fitur ini khusus admin.*', { parse_mode: 'Markdown' });
+    }
+    await handleServiceAction(ctx, 'changelimip');
+});
+
+bot.action('service_checkconfig', async (ctx) => {
+    if (!ctx || !ctx.match) {
+        return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+    }
+    // izin khusus admin
+    if (ctx.from.id.toString() !== adminIds) {
+        return ctx.reply('❌ *Fitur ini khusus admin.*', { parse_mode: 'Markdown' });
+    }
+    await handleServiceAction(ctx, 'checkconfig');
+});
+
 const { exec } = require('child_process');
 
 bot.action('cek_service', async (ctx) => {
@@ -1452,6 +1588,62 @@ bot.action('lock_trojan', async (ctx) => {
   await startSelectServer(ctx, 'lock', 'trojan');
 });
 //LOCK BREAK
+//changelimip
+bot.action('changelimip_ssh', async (ctx) => {
+  if (!ctx || !ctx.match) {
+    return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+  }
+  await startSelectServer(ctx, 'changelimip', 'ssh');
+});
+
+bot.action('changelimip_vmess', async (ctx) => {
+  if (!ctx || !ctx.match) {
+    return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+  }
+  await startSelectServer(ctx, 'changelimip', 'vmess');
+});
+
+bot.action('changelimip_vless', async (ctx) => {
+  if (!ctx || !ctx.match) {
+    return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+  }
+  await startSelectServer(ctx, 'changelimip', 'vless');
+});
+
+bot.action('changelimip_trojan', async (ctx) => {
+  if (!ctx || !ctx.match) {
+    return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+  }
+  await startSelectServer(ctx, 'changelimip', 'trojan');
+});
+//checkconfig
+bot.action('checkconfig_ssh', async (ctx) => {
+  if (!ctx || !ctx.match) {
+    return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+  }
+  await startSelectServer(ctx, 'checkconfig', 'ssh');
+});
+
+bot.action('checkconfig_vmess', async (ctx) => {
+  if (!ctx || !ctx.match) {
+    return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+  }
+  await startSelectServer(ctx, 'checkconfig', 'vmess');
+});
+
+bot.action('checkconfig_vless', async (ctx) => {
+  if (!ctx || !ctx.match) {
+    return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+  }
+  await startSelectServer(ctx, 'checkconfig', 'vless');
+});
+
+bot.action('checkconfig_trojan', async (ctx) => {
+  if (!ctx || !ctx.match) {
+    return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
+  }
+  await startSelectServer(ctx, 'checkconfig', 'trojan');
+});
 //UNLOCK
 bot.action('unlock_ssh', async (ctx) => {
   if (!ctx || !ctx.match) {
@@ -1754,6 +1946,24 @@ bot.action(/(lock)_username_(vmess|vless|trojan|shadowsocks|ssh)_(.+)/, async (c
   };
   await ctx.reply('👤 *Masukkan username yang ingin dikunci:*', { parse_mode: 'Markdown' });
 });
+bot.action(/(changelimip)_username_(vmess|vless|trojan|shadowsocks|ssh)_(.+)/, async (ctx) => {
+  const [action, type, serverId] = [ctx.match[1], ctx.match[2], ctx.match[3]];
+
+  userState[ctx.chat.id] = {
+    step: `username_${action}_${type}`,
+    serverId, type, action
+  };
+  await ctx.reply('👤 *Masukkan username yang ingin ganti limit ip:*', { parse_mode: 'Markdown' });
+});
+bot.action(/(checkconfig)_username_(vmess|vless|trojan|shadowsocks|ssh)_(.+)/, async (ctx) => {
+  const [action, type, serverId] = [ctx.match[1], ctx.match[2], ctx.match[3]];
+
+  userState[ctx.chat.id] = {
+    step: `username_${action}_${type}`,
+    serverId, type, action
+  };
+  await ctx.reply('👤 *Masukkan username yang ingin di cari:*', { parse_mode: 'Markdown' });
+});
 
 bot.on('text', async (ctx) => {
   const state = userState[ctx.chat.id];
@@ -1887,6 +2097,124 @@ bot.on('text', async (ctx) => {
     }});
     return; // Penting! Jangan lanjut ke case lain
   }
+//
+// changelimip USERNAME
+//
+if (state.step?.startsWith('username_changelimip_')) {
+    const username = text;
+
+    if (!/^[a-z0-9]{3,20}$/.test(username)) {
+      return ctx.reply('❌ *Username tidak valid. Gunakan huruf kecil dan angka (3–20 karakter).*', { parse_mode: 'Markdown' });
+    }
+
+    // simpan username ke state untuk step berikutnya
+    userState[ctx.chat.id] = {
+        step: 'input_new_iplimit',
+        username,
+        type: state.type,
+        serverId: state.serverId
+    };
+
+    return ctx.reply('🔢 *Masukkan limit IP baru:*', { parse_mode: 'Markdown' });
+}
+
+if (state.step === 'input_new_iplimit') {
+
+    const newLimit = text.trim();
+
+    // Validasi: harus angka
+    if (!/^\d+$/.test(newLimit)) {
+        return ctx.reply('❌ *Limit IP harus berupa angka.*', { parse_mode: 'Markdown' });
+    }
+
+    const { username, type, serverId } = state;
+
+    delete userState[ctx.chat.id];
+
+    try {
+        const password = 'none', exp = 'none';
+        const iplimit = newLimit;  // ← INI YANG PENTING
+
+        const changeFunc = {
+            vmess: changelimipvmess,
+            vless: changelimipvless,
+            trojan: changelimiptrojan,
+            ssh: changelimipsshvpn
+        };
+
+        let msg = await changeFunc[type](username, password, exp, iplimit, serverId);
+
+        await ctx.reply(`${msg}`, {
+            parse_mode: 'Markdown'
+        });
+
+        logger.info(`Limit IP ${type} user ${username} diubah oleh ${ctx.from.id}`);
+
+    } catch (err) {
+        logger.error('error changelimip:', err.message);
+        ctx.reply('❌ *Terjadi kesalahan.*', { parse_mode: 'Markdown' });
+    }
+
+    return;
+}
+//
+// DELETE checkconfig
+//
+if (state.step?.startsWith('username_checkconfig_')) {
+    const username = text;
+
+    // Validasi username
+    if (!/^[a-z0-9]{3,20}$/.test(username)) {
+        return ctx.reply('❌ *Username tidak valid. Gunakan huruf kecil dan angka (3–20 karakter).*', { parse_mode: 'Markdown' });
+    }
+
+    const { type, serverId } = state;
+
+    // Ambil detail server dulu
+    db.get('SELECT quota, iplimit FROM Server WHERE id = ?', [serverId], async (err, server) => {
+        if (err) {
+            logger.error('⚠️ Error fetching server details:', err.message);
+            return ctx.reply('❌ *Terjadi kesalahan saat mengambil detail server.*', { parse_mode: 'Markdown' });
+        }
+
+        if (!server) {
+            return ctx.reply('❌ *Server tidak ditemukan.*', { parse_mode: 'Markdown' });
+        }
+
+        const quota = server.quota;
+        const iplimit = server.iplimit;
+
+        // Hapus state sementara
+        delete userState[ctx.chat.id];
+
+        try {
+            const password = 'none';
+            const exp = 'none';
+
+            // Fungsi check config per tipe akun
+            const checkFunctions = {
+                ssh: checkconfigsshvpn,
+                vmess: checkconfigvmess,
+                vless: checkconfigvless,
+                trojan: checkconfigtrojan
+            };
+
+            const msg = await checkFunctions[type](username, password, exp, iplimit, quota, serverId);
+
+            await ctx.reply(`${msg}`, { parse_mode: 'Markdown' });
+
+            logger.info(`✅ Config ${type} user ${username} dicek oleh ${ctx.from.id}`);
+        } catch (err) {
+            logger.error('❌ Gagal cek config:', err.message);
+            await ctx.reply('❌ *Terjadi kesalahan saat mengecek config.*', { parse_mode: 'Markdown' });
+        }
+    });
+
+    return; // Penting agar tidak lanjut ke case lain
+}
+//
+// DELETE USERNAME
+//
   if (state.step?.startsWith('username_del_')) {
     const username = text;
     // Validasi username (hanya huruf kecil dan angka, 3-20 karakter)
