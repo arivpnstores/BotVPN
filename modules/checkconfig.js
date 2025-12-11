@@ -95,7 +95,7 @@ Upgrade: websocket
 🔗 http://${s.hostname}:81/myvpn-config.zip
 
 📥 *Download All Config UNLOCK SSH*:
-🔗 http://ssl-${s.hostname}:81/config-Indonesia.zip
+🔗 https://rajaserverpremium.web.id/config-Indonesia.zip
 
 📥 *GRUP TESTIMOINI & BERBAGI BUG*:
 🔗 http://t.me/RAJA\\_VPN\\_STORE
