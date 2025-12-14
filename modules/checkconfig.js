@@ -50,8 +50,8 @@ async function checkconfigsshvpn(username, password, exp, iplimit, serverId) {
 *🔐 SSH Premium Details*
 ────────────────────────
 📡 *SSH WS*    : \`${s.hostname}:80@${s.username}:${s.password}\`
-🔒 *SSH SSL*   : \`ssl-${s.hostname}:443@${s.username}:${s.password}\`
-📶 *SSH UDP*   : \`udp-${s.hostname}:1-65535@${s.username}:${s.password}\`
+🔒 *SSH SSL*   : \`${s.hostname}:443@${s.username}:${s.password}\`
+📶 *SSH UDP*   : \`${s.hostname}:1-65535@${s.username}:${s.password}\`
 🌐 *DNS SELOW* : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
 ────────────────────────
 🌍 *Host*         : \`${s.hostname}\`
@@ -95,10 +95,7 @@ Upgrade: websocket
 🔗 http://${s.hostname}:81/myvpn-config.zip
 
 📥 *Download All Config UNLOCK SSH*:
-🔗 https://rajaserverpremium.web.id/config-Indonesia.zip
-
-📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA\\_VPN\\_STORE
+🔗 http://ssl-${s.hostname}:81/config-Indonesia.zip
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -190,9 +187,6 @@ async function checkconfigvmess(username, exp, quota, iplimit, serverId) {
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
 
-📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA\\_VPN\\_STORE
-
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
 `;
@@ -283,9 +277,6 @@ async function checkconfigvless(username, exp, quota, iplimit, serverId) {
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
 
-📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA\\_VPN\\_STORE
-
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
 `;
@@ -371,9 +362,6 @@ async function checkconfigtrojan(username, exp, quota, iplimit, serverId) {
 ⚙️ *Settings*:
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
-
-📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA\\_VPN\\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!

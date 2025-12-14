@@ -48,23 +48,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
-// ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 1 && exp <= 135) {
-  db.run(
-    'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
-    [serverId],
-    (err) => {
-      if (err) {
-        console.error('⚠️ Gagal update total_create_akun:', err.message);
-      } else {
-        console.log(`✅ total_create_akun diperbarui untuk serverId ${serverId} dengan exp ${exp}`);
-      }
-    }
-  );
-} else {
-  console.log(`⚠️ Exp ${exp} hari tidak dicatat (kurang dari 30 atau lebih dari 135)`);
-}
-// ======= SELESAI LOGIKA UPDATE =======
+
         const msg = `✅ *Renew SSH Account Success!*
 
 🔄 *Akun berhasil diperpanjang*
@@ -129,23 +113,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
-// ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 1 && exp <= 135) {
-  db.run(
-    'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
-    [serverId],
-    (err) => {
-      if (err) {
-        console.error('⚠️ Gagal update total_create_akun:', err.message);
-      } else {
-        console.log(`✅ total_create_akun diperbarui untuk serverId ${serverId} dengan exp ${exp}`);
-      }
-    }
-  );
-} else {
-  console.log(`⚠️ Exp ${exp} hari tidak dicatat (kurang dari 30 atau lebih dari 135)`);
-}
-// ======= SELESAI LOGIKA UPDATE =======
+
         const msg = `✅ *Renew VMess Account Success!*
 
 🔄 *Akun berhasil diperpanjang*
@@ -211,23 +179,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
-// ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 1 && exp <= 135) {
-  db.run(
-    'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
-    [serverId],
-    (err) => {
-      if (err) {
-        console.error('⚠️ Gagal update total_create_akun:', err.message);
-      } else {
-        console.log(`✅ total_create_akun diperbarui untuk serverId ${serverId} dengan exp ${exp}`);
-      }
-    }
-  );
-} else {
-  console.log(`⚠️ Exp ${exp} hari tidak dicatat (kurang dari 30 atau lebih dari 135)`);
-}
-// ======= SELESAI LOGIKA UPDATE =======
+
         const msg = `✅ *Renew VLESS Account Success!*
 
 🔄 *Akun berhasil diperpanjang*
@@ -293,23 +245,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
         const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
-// ======= MULAI LOGIKA UPDATE total_create_akun =======
-if (exp >= 1 && exp <= 135) {
-  db.run(
-    'UPDATE Server SET total_create_akun = total_create_akun + 1 WHERE id = ?',
-    [serverId],
-    (err) => {
-      if (err) {
-        console.error('⚠️ Gagal update total_create_akun:', err.message);
-      } else {
-        console.log(`✅ total_create_akun diperbarui untuk serverId ${serverId} dengan exp ${exp}`);
-      }
-    }
-  );
-} else {
-  console.log(`⚠️ Exp ${exp} hari tidak dicatat (kurang dari 30 atau lebih dari 135)`);
-}
-// ======= SELESAI LOGIKA UPDATE =======
+
         const msg = `✅ *Renew TROJAN Account Success!*
 
 🔄 *Akun berhasil diperpanjang*

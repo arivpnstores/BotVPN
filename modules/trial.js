@@ -54,10 +54,10 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 
 *🔐 SSH Premium Details*
 ────────────────────────
-📡 *SSH WS*       : \`${s.hostname}:80@${s.username}:${s.password}\`
-🔒 *SSH SSL*      : \`ssl-${s.hostname}:443@${s.username}:${s.password}\`
-📶 *SSH UDP*      : \`udp-${s.hostname}:1-65535@${s.username}:${s.password}\`
-🌐 *DNS SELOW*    : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
+📡 *SSH WS*    : \`${s.hostname}:80@${s.username}:${s.password}\`
+🔒 *SSH SSL*   : \`${s.hostname}:443@${s.username}:${s.password}\`
+📶 *SSH UDP*   : \`${s.hostname}:1-65535@${s.username}:${s.password}\`
+🌐 *DNS SELOW* : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
 ────────────────────────
 🌍 *Host*         : \`${s.hostname}\`
 🏢 *ISP*          : \`${s.ISP}\`
@@ -102,9 +102,6 @@ Upgrade: websocket
 
 📥 *Download All Config UNLOCK SSH*:
 🔗 https://rajaserverpremium.web.id/config-Indonesia.zip
-
-📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA\\_VPN\\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -200,9 +197,6 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 - AlterId     : \`0\`
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
-
-📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA\\_VPN\\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -300,9 +294,6 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
 
-📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA\\_VPN\\_STORE
-
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
 `;
@@ -393,9 +384,6 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 ⚙️ *Settings*:
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
-
-📥 *GRUP TESTIMOINI & BERBAGI BUG*:
-🔗 http://t.me/RAJA\\_VPN\\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
