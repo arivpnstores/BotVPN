@@ -111,14 +111,36 @@ server_app() {
             echo -e "${red}DATA QRIS tidak boleh kosong. Silakan coba lagi.${neutral}"
         fi
     done
+    while [ -z "$auth_username_mutasi" ]; do
+        read -p "Masukkan auth_username_mutasi : " auth_username_mutasi
+        if [ -z "$auth_username_mutasi" ]; then
+            echo -e "${red}auth_username_mutasi tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$auth_token_mutasi" ]; do
+        read -p "Masukkan auth_token_mutasi : " auth_token_mutasi
+        if [ -z "$auth_token_mutasi" ]; then
+            echo -e "${red}auth_token_mutasi tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$auth_paymet_getway" ]; do
+        read -p "Masukkan auth_paymet_getway : " auth_paymet_getway
+        if [ -z "$auth_paymet_getway" ]; then
+            echo -e "${red}auth_paymet_getway tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$web_mutasi" ]; do
+        read -p "Masukkan web_mutasi : " web_mutasi
+        if [ -z "$web_mutasi" ]; then
+            echo -e "${red}web_mutasi tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
     while [ -z "$groupid" ]; do
         read -p "Masukkan ID GROUP NOTIF : " groupid
         if [ -z "$groupid" ]; then
             echo -e "${red}DATA QRIS tidak boleh kosong. Silakan coba lagi.${neutral}"
         fi
     done
-merchantid="NONE"
-apikey="NONE"
     rm -f /root/BotVPN/.vars.json
     echo "{
   \"BOT_TOKEN\": \"$token\",
@@ -127,8 +149,10 @@ apikey="NONE"
   \"GROUP_ID\": \"$groupid\",
   \"PORT\": \"6969\",
   \"DATA_QRIS\": \"$dataqris\",
-  \"MERCHANT_ID\": \"$merchantid\",
-  \"API_KEY\": \"$apikey\"
+  \"auth_username_mutasi\": \"$auth_username_mutasi\",
+  \"auth_token_mutasi\": \"$auth_token_mutasi\",
+  \"auth_paymet_getway\": \"$auth_paymet_getway\",
+  \"web_mutasi\": \"$web_mutasi\"
 }" >/root/BotVPN/.vars.json
 
 cd /root/BotVPN
