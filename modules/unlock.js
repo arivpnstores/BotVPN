@@ -61,7 +61,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   });
 }
 async function unlockvmess(username, exp, quota, limitip, serverId) {
-  console.log(`Renewing VMess account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
+  console.log(`Unlock VMess account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
 
   // Validasi username
 if (!/^[a-z0-9-]+$/.test(username)) {
@@ -175,7 +175,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   });
 }
 async function unlocktrojan(username, exp, quota, limitip, serverId) {
-  console.log(`Renewing TROJAN account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
+  console.log(`Unlock TROJAN account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
 
   // Validasi username
 if (!/^[a-z0-9-]+$/.test(username)) {
@@ -233,7 +233,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 }
 //create shadowsocks ga ada di potato
   async function unlockshadowsocks(username, exp, quota, limitip, serverId) {
-    console.log(`Renewing Shadowsocks account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip} on server ${serverId}`);
+    console.log(`Unlock Shadowsocks account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip} on server ${serverId}`);
     
     // Validasi username
   if (!/^[a-z0-9-]+$/.test(username)) {

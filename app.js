@@ -83,13 +83,6 @@ const {
   changelimiptrojan
 } = require('./modules/change-ip');
 
-const { 
-  checkconfigsshvpn, 
-  checkconfigvmess, 
-  checkconfigvless, 
-  checkconfigtrojan
-} = require('./modules/checkconfig');
-
 const fsPromises = require('fs/promises');
 const path = require('path');
 const trialFile = path.join(__dirname, 'trial.db');
@@ -442,12 +435,12 @@ let keyboard;
       { text: '📶 Cek Server', callback_data: 'cek_service' }
     ],
     [
-      { text: '🗝️ Kunci Akun', callback_data: 'service_lock' },
-      { text: '🔐 Buka Kunci Akun', callback_data: 'service_unlock' }
+      { text: '🔀 Change Limit IP', callback_data: 'service_changelimip' },
+      { text: '🔧 Fix Akun Erorr', callback_data: 'service_fix' }
     ],
     [
-      { text: '🔀 Change Limit IP', callback_data: 'service_changelimip' },
-      { text: '📝 Check Config Akun', callback_data: 'service_checkconfig' }
+      { text: '🗝️ Kunci Akun', callback_data: 'service_lock' },
+      { text: '🔐 Buka Kunci Akun', callback_data: 'service_unlock' }
     ],
     [
       { text: '⌛ Trial Akun', callback_data: 'service_trial' },
@@ -1071,11 +1064,11 @@ async function handleServiceAction(ctx, action) {
       [{ text: 'Change Limit Vmess', callback_data: 'changelimip_vmess' }, { text: 'Change Limit Vless', callback_data: 'changelimip_vless' }],
       [{ text: 'Change Limit Trojan', callback_data: 'changelimip_trojan' }, { text: '🔙 Kembali', callback_data: 'send_main_menu' }],
     ];
-  } else if (action === 'checkconfig') {
+  } else if (action === 'fix') {
     keyboard = [
-      [{ text: 'Check Config Ssh/Ovpn', callback_data: 'checkconfig_ssh' }],      
-      [{ text: 'Check Config Vmess', callback_data: 'checkconfig_vmess' }, { text: 'Check Config Vless', callback_data: 'checkconfig_vless' }],
-      [{ text: 'Check Config Trojan', callback_data: 'checkconfig_trojan' }, { text: '🔙 Kembali', callback_data: 'send_main_menu' }],
+      [{ text: 'Fix Ssh/Ovpn', callback_data: 'fix_ssh' }],      
+      [{ text: 'Fix Vmess', callback_data: 'fix_vmess' }, { text: 'Fix Vless', callback_data: 'fix_vless' }],
+      [{ text: 'Fix Trojan', callback_data: 'fix_trojan' }, { text: '🔙 Kembali', callback_data: 'send_main_menu' }],
     ];
   } 
   try {
@@ -1375,15 +1368,11 @@ bot.action('service_changelimip', async (ctx) => {
     await handleServiceAction(ctx, 'changelimip');
 });
 
-bot.action('service_checkconfig', async (ctx) => {
+bot.action('service_fix', async (ctx) => {
     if (!ctx || !ctx.match) {
         return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
     }
-    // izin khusus admin
-    if (ctx.from.id.toString() !== adminIds) {
-        return ctx.reply('❌ *Fitur ini khusus admin.*', { parse_mode: 'Markdown' });
-    }
-    await handleServiceAction(ctx, 'checkconfig');
+    await handleServiceAction(ctx, 'fix');
 });
 
 const { exec } = require('child_process');
@@ -1576,33 +1565,33 @@ bot.action('changelimip_trojan', async (ctx) => {
   }
   await startSelectServer(ctx, 'changelimip', 'trojan');
 });
-//checkconfig
-bot.action('checkconfig_ssh', async (ctx) => {
+//fix
+bot.action('fix_ssh', async (ctx) => {
   if (!ctx || !ctx.match) {
     return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
   }
-  await startSelectServer(ctx, 'checkconfig', 'ssh');
+  await startSelectServer(ctx, 'fix', 'ssh');
 });
 
-bot.action('checkconfig_vmess', async (ctx) => {
+bot.action('fix_vmess', async (ctx) => {
   if (!ctx || !ctx.match) {
     return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
   }
-  await startSelectServer(ctx, 'checkconfig', 'vmess');
+  await startSelectServer(ctx, 'fix', 'vmess');
 });
 
-bot.action('checkconfig_vless', async (ctx) => {
+bot.action('fix_vless', async (ctx) => {
   if (!ctx || !ctx.match) {
     return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
   }
-  await startSelectServer(ctx, 'checkconfig', 'vless');
+  await startSelectServer(ctx, 'fix', 'vless');
 });
 
-bot.action('checkconfig_trojan', async (ctx) => {
+bot.action('fix_trojan', async (ctx) => {
   if (!ctx || !ctx.match) {
     return ctx.reply('❌ *GAGAL!* Terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.', { parse_mode: 'Markdown' });
   }
-  await startSelectServer(ctx, 'checkconfig', 'trojan');
+  await startSelectServer(ctx, 'fix', 'trojan');
 });
 //UNLOCK
 bot.action('unlock_ssh', async (ctx) => {
@@ -1935,15 +1924,17 @@ bot.action(/(changelimip)_username_(vmess|vless|trojan|shadowsocks|ssh)_(.+)/, a
   };
   await ctx.reply('👤 *Masukkan username yang ingin ganti limit ip:*', { parse_mode: 'Markdown' });
 });
-bot.action(/(checkconfig)_username_(vmess|vless|trojan|shadowsocks|ssh)_(.+)/, async (ctx) => {
+bot.action(/(fix)_username_(vmess|vless|trojan|shadowsocks|ssh)_(.+)/, async (ctx) => {
   const [action, type, serverId] = [ctx.match[1], ctx.match[2], ctx.match[3]];
 
   userState[ctx.chat.id] = {
     step: `username_${action}_${type}`,
     serverId, type, action
   };
-  await ctx.reply('👤 *Masukkan username yang ingin di cari:*', { parse_mode: 'Markdown' });
+
+  await ctx.reply('👤 *Masukkan username yang ingin di-fix (lock lalu unlock):*', { parse_mode: 'Markdown' });
 });
+
 
 bot.on('text', async (ctx) => {
   const state = userState[ctx.chat.id];
@@ -2137,60 +2128,72 @@ if (state.step === 'input_new_iplimit') {
 
     return;
 }
-//
-// DELETE checkconfig
-//
-if (state.step?.startsWith('username_checkconfig_')) {
-    const username = text;
+// fix
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+if (state.step?.startsWith('username_fix_')) {
+  const username = text.trim();
 
-    // Validasi username
-    if (!/^[a-z0-9]{3,20}$/.test(username)) {
-        return ctx.reply('❌ *Username tidak valid. Gunakan huruf kecil dan angka (3–20 karakter).*', { parse_mode: 'Markdown' });
+  // Validasi username
+  if (!/^[a-z0-9]{3,20}$/.test(username)) {
+    return ctx.reply('❌ *Username tidak valid. Gunakan huruf kecil dan angka (3–20 karakter).*', { parse_mode: 'Markdown' });
+  }
+
+  const { type, serverId } = state;
+  delete userState[ctx.chat.id];
+
+  try {
+    const password = 'none', exp = 'none', iplimit = 'none';
+
+    const lockFns = {
+      vmess: lockvmess,
+      vless: lockvless,
+      trojan: locktrojan,
+      shadowsocks: lockshadowsocks,
+      ssh: lockssh
+    };
+
+    const unlockFns = {
+      vmess: unlockvmess,
+      vless: unlockvless,
+      trojan: unlocktrojan,
+      shadowsocks: unlockshadowsocks,
+      ssh: unlockssh
+    };
+
+    if (!lockFns[type] || !unlockFns[type]) {
+      return ctx.reply('❌ *Tipe akun tidak dikenali.*', { parse_mode: 'Markdown' });
     }
 
-    const { type, serverId } = state;
+    await ctx.reply(`🛠️ *FIX ACCOUNT* (${type.toUpperCase()})\n👤 Username: \`${username}\`\n\n1) 🔒 Lock...`, { parse_mode: 'Markdown' });
 
-    // Ambil detail server dulu
-    db.get('SELECT quota, iplimit FROM Server WHERE id = ?', [serverId], async (err, server) => {
-        if (err) {
-            logger.error('⚠️ Error fetching server details:', err.message);
-            return ctx.reply('❌ *Terjadi kesalahan saat mengambil detail server.*', { parse_mode: 'Markdown' });
-        }
+    // 1) LOCK
+    const lockMsg = await lockFns[type](username, password, exp, iplimit, serverId);
 
-        if (!server) {
-            return ctx.reply('❌ *Server tidak ditemukan.*', { parse_mode: 'Markdown' });
-        }
+    // Delay (boleh kamu ubah 2-10 detik)
+    await sleep(3000);
 
-        const quota = server.quota;
-        const iplimit = server.iplimit;
+    await ctx.reply(`2) 🔓 Unlock...`, { parse_mode: 'Markdown' });
 
-        // Hapus state sementara
-        delete userState[ctx.chat.id];
+    // 2) UNLOCK
+    const unlockMsg = await unlockFns[type](username, password, exp, iplimit, serverId);
 
-        try {
-            const password = 'none';
-            const exp = 'none';
+    // Output final (biar jelas hasilnya)
+    const finalMsg =
+      `✅ *FIX SELESAI*\n` +
+      `👤 Username: \`${username}\`\n` +
+      `🧩 Type: *${type.toUpperCase()}*\n` +
+      `🖥 Server: \`${serverId}\`\n\n` +
+      `🔒 *LOCK RESULT:*\n${lockMsg}\n\n` +
+      `🔓 *UNLOCK RESULT:*\n${unlockMsg}`;
 
-            // Fungsi check config per tipe akun
-            const checkFunctions = {
-                ssh: checkconfigsshvpn,
-                vmess: checkconfigvmess,
-                vless: checkconfigvless,
-                trojan: checkconfigtrojan
-            };
+    await ctx.reply(finalMsg, { parse_mode: 'Markdown' });
+    logger.info(`✅ Fix akun ${type} sukses: ${username} oleh ${ctx.from.id}`);
+  } catch (err) {
+    logger.error('❌ Gagal fix akun:', err.message);
+    await ctx.reply(`❌ *Fix gagal.*\n${err.message}`, { parse_mode: 'Markdown' });
+  }
 
-            const msg = await checkFunctions[type](username, password, exp, iplimit, quota, serverId);
-
-            await ctx.reply(`${msg}`, { parse_mode: 'Markdown' });
-
-            logger.info(`✅ Config ${type} user ${username} dicek oleh ${ctx.from.id}`);
-        } catch (err) {
-            logger.error('❌ Gagal cek config:', err.message);
-            await ctx.reply('❌ *Terjadi kesalahan saat mengecek config.*', { parse_mode: 'Markdown' });
-        }
-    });
-
-    return; // Penting agar tidak lanjut ke case lain
+  return; // Penting! jangan lanjut ke case lain
 }
 //
 // DELETE USERNAME
@@ -3899,7 +3902,7 @@ const qrBuffer = Buffer.from(qrResponse.data);
       `- Nominal Top Up: Rp ${amount}\n` +
       `- Admin Fee : Rp ${adminFee}\n` +
                   `⚠️ *Penting:* Mohon transfer sesuai nominal\n` +
-      `⏱️ Waktu: 5 menit\n\n` +
+      `⏱️ Waktu: 60 menit\n\n` +
                   `⚠️ *Catatan:*\n` +
                   `- Pembayaran akan otomatis terverifikasi\n` +
       `- Jika pembayaran berhasil, saldo akan otomatis ditambahkan`;
@@ -4019,7 +4022,7 @@ async function checkQRISStatus() {
       if (deposit.status !== 'pending') continue;
 
       const depositAge = Date.now() - deposit.timestamp;
-      if (depositAge > 5 * 60 * 1000) {
+      if (depositAge > 60 * 60 * 1000) {
         try {
           if (deposit.qrMessageId) {
             await bot.telegram.deleteMessage(deposit.userId, deposit.qrMessageId);

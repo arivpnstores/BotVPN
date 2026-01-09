@@ -57,7 +57,11 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 📡 *SSH WS*    : \`${s.hostname}:80@${s.username}:${s.password}\`
 🔒 *SSH SSL*   : \`${s.hostname}:443@${s.username}:${s.password}\`
 📶 *SSH UDP*   : \`${s.hostname}:1-65535@${s.username}:${s.password}\`
-🌐 *DNS SELOW* : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
+🌐 *SSH SLOWDNS* : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
+────────────────────────
+*🔑 Account ZIVPN UDP*
+📡 *DOMAIN*    : \`${s.hostname}\`
+🔑 *Password*     : \`${s.username}\`
 ────────────────────────
 🌍 *Host*         : \`${s.hostname}\`
 🏢 *ISP*          : \`${s.ISP}\`
@@ -97,11 +101,27 @@ Upgrade: websocket
 \`
 
 
+📥 *Download All Config UNLOCK SSH*:
+🔗 https://rajaserverpremium.web.id/config-Indonesia.zip
+
+📘 *TUTORIAL GANTI SSH*
+📂 Google Drive:
+https://drive.google.com/file/d/1PGjMZcWkjOCjZMBXIlqpTTSRG4lCfYn\_/view?usp=drive\_/link
+
+📘 *TUTORIAL BUAT CONFIG MODE SSH*
+📂 Google Drive:
+https://drive.google.com/file/d/1Sj37lUzkizp2-OoriCgVUC1IDRGlP1e3/view?usp=drive\_/link
+
+📌 *Langkah Singkat:*
+1️⃣ Buka link di atas  
+2️⃣ Ikuti panduan di dalam video
+3️⃣ Selesai & Connect 🚀  
+
 📥 *Download Config Ovpn*:
 🔗 http://${s.hostname}:81/myvpn-config.zip
 
-📥 *Download All Config UNLOCK SSH*:
-🔗 https://rajaserverpremium.web.id/config-Indonesia.zip
+📥 *GRUP TESTIMOINI & BERBAGI BUG*:
+🔗 http://t.me/RAJA\\_VPN\\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -197,6 +217,18 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 - AlterId     : \`0\`
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
+
+📘 *TUTORIAL BUAT CONFIG MODE VMESS VLESS TROJAN*
+📂 Google Drive:
+https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=drive\_/link
+
+📌 *Langkah Singkat:*
+1️⃣ Buka link di atas  
+2️⃣ Ikuti panduan di dalam video
+3️⃣ Selesai & Connect 🚀  
+
+📥 *GRUP TESTIMOINI & BERBAGI BUG*:
+🔗 http://t.me/RAJA\\_VPN\\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
@@ -294,6 +326,18 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
 
+📘 *TUTORIAL BUAT CONFIG MODE VMESS VLESS TROJAN*
+📂 Google Drive:
+https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=drive\_/link
+
+📌 *Langkah Singkat:*
+1️⃣ Buka link di atas  
+2️⃣ Ikuti panduan di dalam video
+3️⃣ Selesai & Connect 🚀  
+
+📥 *GRUP TESTIMOINI & BERBAGI BUG*:
+🔗 http://t.me/RAJA\\_VPN\\_STORE
+
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!
 `;
@@ -384,6 +428,18 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 ⚙️ *Settings*:
 - Security    : \`auto\`
 - Network     : \`ws, grpc, upgrade\`
+
+📘 *TUTORIAL BUAT CONFIG MODE VMESS VLESS TROJAN*
+📂 Google Drive:
+https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=drive\_/link
+
+📌 *Langkah Singkat:*
+1️⃣ Buka link di atas  
+2️⃣ Ikuti panduan di dalam video
+3️⃣ Selesai & Connect 🚀  
+
+📥 *GRUP TESTIMOINI & BERBAGI BUG*:
+🔗 http://t.me/RAJA\\_VPN\\_STORE
 
 *© Telegram Bots - 2025*
 ✨ Terima kasih telah menggunakan layanan kami!

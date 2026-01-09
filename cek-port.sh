@@ -1,54 +1,49 @@
 #!/bin/bash
 
-# Daftar server (ubah sesuai kebutuhan)
-servers=(
-  "sgvip.rajaserverpremium.web.id"
-  "sgvvip.rajaserverpremium.web.id"
-  "sgvvip2.rajaserverpremium.web.id"
-  "sgteam1.rajaserverpremium.web.id"
-  "idnusa.rajaserverpremium.web.id"
-  "idnusa2.rajaserverpremium.web.id"
-  "idnusastb.rajaserverpremium.web.id"
+# Urutan tampilan (INI yang bikin rapi)
+server_order=(
+  "SG-VIP"
+  "SG-VVIP"
+  "SG-VVIP2"
+  "SG-TEAM1"
+  "ID-NUSA"
+  "ID-NUSA2"
+  "ID-NUSA-STB"
 )
 
-# Daftar port + label
-declare -A ports
-ports=(
+# Alias => domain
+declare -A servers=(
+  ["SG-VIP"]="sgvip.rajaserverpremium.web.id"
+  ["SG-VVIP"]="sgvvip.rajaserverpremium.web.id"
+  ["SG-VVIP2"]="sgvvip2.rajaserverpremium.web.id"
+  ["SG-TEAM1"]="sgteam1.rajaserverpremium.web.id"
+  ["ID-NUSA"]="idnusa.rajaserverpremium.web.id"
+  ["ID-NUSA2"]="idnusa2.rajaserverpremium.web.id"
+  ["ID-NUSA-STB"]="idnusastb.rajaserverpremium.web.id"
+)
+
+# Port + label
+declare -A ports=(
   [22]="VPS LOGIN"
   [80]="NO TLS"
   [443]="TLS"
 )
 
-# Warna
-green="\e[32m"
-red="\e[31m"
-nc="\e[0m"
+green="\e[32m"; red="\e[31m"; nc="\e[0m"
 
 echo "🔍 Cek status server"
 echo "-------------------------------------------"
 
-# Loop setiap server
-for server in "${servers[@]}"; do
-  echo -e "\n🌐 Server: $server"
+for alias in "${server_order[@]}"; do
+  host="${servers[$alias]}"
+  echo -e "\n🌐 Server: $alias"
 
-  # Jika nama server mengandung "udp-" hanya cek port 22
-  if [[ "$server" == *"udp-"* ]]; then
-    port=22
-    timeout 2 bash -c "</dev/tcp/$server/$port" &>/dev/null
+  for port in 22 80 443; do
+    timeout 2 bash -c "</dev/tcp/$host/$port" &>/dev/null
     if [[ $? -eq 0 ]]; then
       echo -e "  Port $port (${ports[$port]}): ${green}OPEN${nc}"
     else
       echo -e "  Port $port (${ports[$port]}): ${red}CLOSED${nc}"
     fi
-  else
-    # Cek semua port untuk server SSL
-    for port in "${!ports[@]}"; do
-      timeout 2 bash -c "</dev/tcp/$server/$port" &>/dev/null
-      if [[ $? -eq 0 ]]; then
-        echo -e "  Port $port (${ports[$port]}): ${green}OPEN${nc}"
-      else
-        echo -e "  Port $port (${ports[$port]}): ${red}CLOSED${nc}"
-      fi
-    done
-  fi
+  done
 done

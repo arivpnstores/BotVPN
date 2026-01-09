@@ -61,7 +61,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   });
 }
 async function delvmess(username, exp, quota, limitip, serverId) {
-  console.log(`Renewing VMess account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
+  console.log(`Delete VMess account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
 
   // Validasi username
 if (!/^[a-z0-9-]+$/.test(username)) {
@@ -118,7 +118,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   });
 }
 async function delvless(username, exp, quota, limitip, serverId) {
-  console.log(`Renewing VLESS account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
+  console.log(`Delete VLESS account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
 
   // Validasi username
 if (!/^[a-z0-9-]+$/.test(username)) {
@@ -175,7 +175,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   });
 }
 async function deltrojan(username, exp, quota, limitip, serverId) {
-  console.log(`Renewing TROJAN account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
+  console.log(`Delete TROJAN account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip}`);
 
   // Validasi username
 if (!/^[a-z0-9-]+$/.test(username)) {
@@ -233,7 +233,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 }
 //create shadowsocks ga ada di potato
   async function delshadowsocks(username, exp, quota, limitip, serverId) {
-    console.log(`Renewing Shadowsocks account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip} on server ${serverId}`);
+    console.log(`Delete Shadowsocks account for ${username} with expiry ${exp} days, quota ${quota} GB, limit IP ${limitip} on server ${serverId}`);
     
     // Validasi username
   if (!/^[a-z0-9-]+$/.test(username)) {

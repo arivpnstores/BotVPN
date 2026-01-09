@@ -38,7 +38,6 @@ wget -O start "https://raw.githubusercontent.com/arivpnstores/BotVPN/main/start"
 wget -O update.sh "https://raw.githubusercontent.com/arivpnstores/BotVPN/main/update.sh"
 wget -O /root/BotVPN/modules/reseller.js "https://raw.githubusercontent.com/arivpnstores/BotVPN/main/modules/reseller.js"
 wget -O /root/BotVPN/modules/change-ip.js "https://raw.githubusercontent.com/arivpnstores/BotVPN/main/modules/change-ip.js"
-wget -O /root/BotVPN/modules/checkconfig.js "https://raw.githubusercontent.com/arivpnstores/BotVPN/main/modules/checkconfig.js"
 wget -O /root/BotVPN/modules/create.js "https://raw.githubusercontent.com/arivpnstores/BotVPN/main/modules/create.js"
 wget -O /root/BotVPN/modules/del.js "https://raw.githubusercontent.com/arivpnstores/BotVPN/main/modules/del.js"
 wget -O /root/BotVPN/modules/lock.js "https://raw.githubusercontent.com/arivpnstores/BotVPN/main/modules/lock.js"
@@ -113,4 +112,77 @@ EOF
 
 chmod +x /usr/bin/backup_sellvpn
 service cron restart
+
+    echo -e "${orange}─────────────────────────────────────────${neutral}"
+    echo -e "   ${green}.:::. BOT TELEGRAM UPDATE .:::.   ${neutral}"
+    echo -e "${orange}─────────────────────────────────────────${neutral}"
+    read -p "Masukkan token bot: " token
+    while [ -z "$token" ]; do
+        read -p "Masukkan token bot: " token
+        if [ -z "$token" ]; then
+            echo -e "${red}Token bot tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$adminid" ]; do
+        read -p "Masukkan admin ID: " adminid
+        if [ -z "$adminid" ]; then
+            echo -e "${red}Admin ID tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$namastore" ]; do
+        read -p "Masukkan nama store: " namastore
+        if [ -z "$namastore" ]; then
+            echo -e "${red}Nama store tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$dataqris" ]; do
+        read -p "Masukkan DATA QRIS: " dataqris
+        if [ -z "$dataqris" ]; then
+            echo -e "${red}DATA QRIS tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$auth_username_mutasi" ]; do
+        read -p "Masukkan auth_username_mutasi : " auth_username_mutasi
+        if [ -z "$auth_username_mutasi" ]; then
+            echo -e "${red}auth_username_mutasi tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$auth_token_mutasi" ]; do
+        read -p "Masukkan auth_token_mutasi : " auth_token_mutasi
+        if [ -z "$auth_token_mutasi" ]; then
+            echo -e "${red}auth_token_mutasi tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$auth_paymet_getway" ]; do
+        read -p "Masukkan auth_paymet_getway : " auth_paymet_getway
+        if [ -z "$auth_paymet_getway" ]; then
+            echo -e "${red}auth_paymet_getway tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$web_mutasi" ]; do
+        read -p "Masukkan web_mutasi : " web_mutasi
+        if [ -z "$web_mutasi" ]; then
+            echo -e "${red}web_mutasi tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    while [ -z "$groupid" ]; do
+        read -p "Masukkan ID GROUP NOTIF : " groupid
+        if [ -z "$groupid" ]; then
+            echo -e "${red}DATA QRIS tidak boleh kosong. Silakan coba lagi.${neutral}"
+        fi
+    done
+    rm -f /root/BotVPN/.vars.json
+    echo "{
+  \"BOT_TOKEN\": \"$token\",
+  \"USER_ID\": \"$adminid\",
+  \"NAMA_STORE\": \"$namastore\",
+  \"GROUP_ID\": \"$groupid\",
+  \"PORT\": \"6969\",
+  \"DATA_QRIS\": \"$dataqris\",
+  \"auth_username_mutasi\": \"$auth_username_mutasi\",
+  \"auth_token_mutasi\": \"$auth_token_mutasi\",
+  \"auth_paymet_getway\": \"$auth_paymet_getway\",
+  \"web_mutasi\": \"$web_mutasi\"
+}" >/root/BotVPN/.vars.json
+
 cd 
