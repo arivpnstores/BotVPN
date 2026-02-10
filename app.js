@@ -1884,12 +1884,7 @@ await bot.telegram.sendMessage(
 ━━━━━━━━━━━━━━━━━━━━
 </blockquote>`,
   { parse_mode: 'HTML' }
-    );
-  } catch (err) {
-    // ❗️INI KUNCI: gagal kirim grup ≠ gagal create akun
-    logger.warn(`Gagal kirim notif ke grup: ${err.message}`);
-  }
-}
+       );
 
     const trialFunctions = {
       ssh: trialssh,
@@ -2417,12 +2412,7 @@ await bot.telegram.sendMessage(
 ━━━━━━━━━━━━━━━━━━━━
 </blockquote>`,
   { parse_mode: 'HTML' }
-    );
-  } catch (err) {
-    // ❗️INI KUNCI: gagal kirim grup ≠ gagal create akun
-    logger.warn(`Gagal kirim notif ke grup: ${err.message}`);
-  }
-}
+   );
           } else if (action === 'renew') {
             if (type === 'vmess') {
               msg = await renewvmess(username, exp, quota, iplimit, serverId);
@@ -2459,12 +2449,7 @@ await bot.telegram.sendMessage(
 ━━━━━━━━━━━━━━━━━━━━
 </blockquote>`,
   { parse_mode: 'HTML' }
-    );
-  } catch (err) {
-    // ❗️INI KUNCI: gagal kirim grup ≠ gagal create akun
-    logger.warn(`Gagal kirim notif ke grup: ${err.message}`);
-  }
-}
+       );
 }
 //SALDO DATABES
 // setelah bikin akun (create/renew), kita cek hasilnya
@@ -3988,10 +3973,10 @@ const SOCKS_POOL = [
 'aristore:1447@idtechno2.rajaserverpremium.web.id:1080',
 'aristore:1447@biznet.rajaserverpremium.web.id:1080',
 'aristore:1447@biznet2.rajaserverpremium.web.id:1080',
-'aristore:1447@biznet3.rajaserverpremium.web.id:1080',
+'aristore:1447@newmedia5.rajaserverpremium.web.id:1080',
 'aristore:1447@biznet4.rajaserverpremium.web.id:1080',
-'aristore:1447@biznet5.rajaserverpremium.web.id:1080',
-'aristore:1447@biznet6.rajaserverpremium.web.id:1080',
+'aristore:1447@newmedia7.rajaserverpremium.web.id:1080',
+'aristore:1447@newmedia8.rajaserverpremium.web.id:1080',
 ];
 
 function getRandomProxy() {
