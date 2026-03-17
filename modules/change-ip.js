@@ -23,29 +23,62 @@ async function changelimipsshvpn(username, password, exp, iplimit, serverId) {
       const web_URL = `http://${domain}${param}`; // Contoh: http://domainmu.com/vps/changelimipsshvpn
       const AUTH_TOKEN = server.auth;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "accept: application/json" \
 -H "Content-Type: application/json" \
 -d '{"limitip": ${iplimit},"username": "${username}"}'`;
 
-      exec(curlCommand, (_, stdout) => {
-        let d;
-        try {
-          d = JSON.parse(stdout);
-        } catch (e) {
-          console.error('❌ Gagal parsing JSON:', e.message);
-          console.error('🪵 Output:', stdout);
-          return resolve('❌ Format respon dari server tidak valid.');
-        }
+      exec(curlCommand, (err, stdout, stderr) => {
+  // 1) Curl error / exit code error
+  if (err) {
+    console.error("❌ Curl error:", err.message);
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Gagal menghubungi server (curl error).");
+  }
 
-        if (d?.meta?.code !== 200 || !d.data) {
-          console.error('❌ Respons error:', d);
-          const errMsg = d?.message || d?.meta?.message || JSON.stringify(d, null, 2);
-          return resolve(`❌ Respons error:\n${errMsg}`);
-        }
+  // 2) Output kosong / whitespace
+  const out = (stdout || "").trim();
+  if (!out) {
+    console.error("❌ Output kosong dari server.");
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Respon server kosong / tidak valid.");
+  }
 
-        const s = d.data;
+  // 3) Cepat deteksi bukan JSON (opsional tapi bagus)
+  if (!(out.startsWith("{") || out.startsWith("["))) {
+    console.error("❌ Respon bukan JSON. Sample:", out.slice(0, 200));
+    return resolve("❌ Format respon dari server tidak valid (bukan JSON).");
+  }
+
+  // 4) Parse JSON
+  let d;
+  try {
+    d = JSON.parse(out);
+  } catch (e) {
+    console.error("❌ Gagal parsing JSON:", e.message);
+    console.error("🪵 Output:", out.slice(0, 500));
+    return resolve("❌ Format respon dari server tidak valid (JSON rusak).");
+  }
+
+  // 5) Validasi minimal schema
+  if (!d || typeof d !== "object") {
+    console.error("❌ JSON bukan object:", d);
+    return resolve("❌ Respon server tidak valid.");
+  }
+
+  // 6) Error dari backend
+  if (d?.meta?.code !== 200 || !d?.data) {
+    console.error("❌ Respons error:", d);
+    const errMsg =
+      d?.message ||
+      d?.meta?.message ||
+      (typeof d === "string" ? d : JSON.stringify(d));
+    return resolve(`❌ Respons error:\n${errMsg}`);
+  }
+
+  // 7) Sukses, baru lanjut
+  const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Change Limit IP SSH Account Success!*
 
@@ -83,29 +116,62 @@ async function changelimipvmess(username, exp, quota, iplimit, serverId) {
       const web_URL = `http://${domain}${param}`; // contoh: http://domain.com/vps/changelimipvmess
       const AUTH_TOKEN = server.auth;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "accept: application/json" \
 -H "Content-Type: application/json" \
 -d '{"limitip": ${iplimit},"username": "${username}"}'`;
 
-      exec(curlCommand, (_, stdout) => {
-        let d;
-        try {
-          d = JSON.parse(stdout);
-        } catch (e) {
-          console.error('❌ Gagal parsing JSON:', e.message);
-          console.error('🪵 Output:', stdout);
-          return resolve('❌ Format respon dari server tidak valid.');
-        }
+      exec(curlCommand, (err, stdout, stderr) => {
+  // 1) Curl error / exit code error
+  if (err) {
+    console.error("❌ Curl error:", err.message);
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Gagal menghubungi server (curl error).");
+  }
 
-        if (d?.meta?.code !== 200 || !d.data) {
-          console.error('❌ Respons error:', d);
-          const errMsg = d?.message || d?.meta?.message || JSON.stringify(d, null, 2);
-          return resolve(`❌ Respons error:\n${errMsg}`);
-        }
+  // 2) Output kosong / whitespace
+  const out = (stdout || "").trim();
+  if (!out) {
+    console.error("❌ Output kosong dari server.");
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Respon server kosong / tidak valid.");
+  }
 
-        const s = d.data;
+  // 3) Cepat deteksi bukan JSON (opsional tapi bagus)
+  if (!(out.startsWith("{") || out.startsWith("["))) {
+    console.error("❌ Respon bukan JSON. Sample:", out.slice(0, 200));
+    return resolve("❌ Format respon dari server tidak valid (bukan JSON).");
+  }
+
+  // 4) Parse JSON
+  let d;
+  try {
+    d = JSON.parse(out);
+  } catch (e) {
+    console.error("❌ Gagal parsing JSON:", e.message);
+    console.error("🪵 Output:", out.slice(0, 500));
+    return resolve("❌ Format respon dari server tidak valid (JSON rusak).");
+  }
+
+  // 5) Validasi minimal schema
+  if (!d || typeof d !== "object") {
+    console.error("❌ JSON bukan object:", d);
+    return resolve("❌ Respon server tidak valid.");
+  }
+
+  // 6) Error dari backend
+  if (d?.meta?.code !== 200 || !d?.data) {
+    console.error("❌ Respons error:", d);
+    const errMsg =
+      d?.message ||
+      d?.meta?.message ||
+      (typeof d === "string" ? d : JSON.stringify(d));
+    return resolve(`❌ Respons error:\n${errMsg}`);
+  }
+
+  // 7) Sukses, baru lanjut
+  const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Change Limit IP VMess Account Success!*
 
@@ -143,29 +209,62 @@ async function changelimipvless(username, exp, quota, iplimit, serverId) {
       const web_URL = `http://${domain}${param}`;       // contoh: http://domain.com/vps/changelimipvless
       const AUTH_TOKEN = server.auth;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "accept: application/json" \
 -H "Content-Type: application/json" \
 -d '{"limitip": ${iplimit},"username": "${username}"}'`;
 
-      exec(curlCommand, (_, stdout) => {
-        let d;
-        try {
-          d = JSON.parse(stdout);
-        } catch (e) {
-          console.error('❌ Gagal parsing JSON:', e.message);
-          console.error('🪵 Output:', stdout);
-          return resolve('❌ Format respon dari server tidak valid.');
-        }
+      exec(curlCommand, (err, stdout, stderr) => {
+  // 1) Curl error / exit code error
+  if (err) {
+    console.error("❌ Curl error:", err.message);
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Gagal menghubungi server (curl error).");
+  }
 
-        if (d?.meta?.code !== 200 || !d.data) {
-          console.error('❌ Respons error:', d);
-          const errMsg = d?.message || d?.meta?.message || JSON.stringify(d, null, 2);
-          return resolve(`❌ Respons error:\n${errMsg}`);
-        }
+  // 2) Output kosong / whitespace
+  const out = (stdout || "").trim();
+  if (!out) {
+    console.error("❌ Output kosong dari server.");
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Respon server kosong / tidak valid.");
+  }
 
-        const s = d.data;
+  // 3) Cepat deteksi bukan JSON (opsional tapi bagus)
+  if (!(out.startsWith("{") || out.startsWith("["))) {
+    console.error("❌ Respon bukan JSON. Sample:", out.slice(0, 200));
+    return resolve("❌ Format respon dari server tidak valid (bukan JSON).");
+  }
+
+  // 4) Parse JSON
+  let d;
+  try {
+    d = JSON.parse(out);
+  } catch (e) {
+    console.error("❌ Gagal parsing JSON:", e.message);
+    console.error("🪵 Output:", out.slice(0, 500));
+    return resolve("❌ Format respon dari server tidak valid (JSON rusak).");
+  }
+
+  // 5) Validasi minimal schema
+  if (!d || typeof d !== "object") {
+    console.error("❌ JSON bukan object:", d);
+    return resolve("❌ Respon server tidak valid.");
+  }
+
+  // 6) Error dari backend
+  if (d?.meta?.code !== 200 || !d?.data) {
+    console.error("❌ Respons error:", d);
+    const errMsg =
+      d?.message ||
+      d?.meta?.message ||
+      (typeof d === "string" ? d : JSON.stringify(d));
+    return resolve(`❌ Respons error:\n${errMsg}`);
+  }
+
+  // 7) Sukses, baru lanjut
+  const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Change Limit IP VLESS Account Success!*
 
@@ -203,29 +302,62 @@ async function changelimiptrojan(username, exp, quota, iplimit, serverId) {
       const web_URL = `http://${domain}${param}`;       // contoh: http://domain.com/vps/changelimiptrojan
       const AUTH_TOKEN = server.auth;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "accept: application/json" \
 -H "Content-Type: application/json" \
 -d '{"limitip": ${iplimit},"username": "${username}"}'`;
 
-      exec(curlCommand, (_, stdout) => {
-        let d;
-        try {
-          d = JSON.parse(stdout);
-        } catch (e) {
-          console.error('❌ Gagal parsing JSON:', e.message);
-          console.error('🪵 Output:', stdout);
-          return resolve('❌ Format respon dari server tidak valid.');
-        }
+      exec(curlCommand, (err, stdout, stderr) => {
+  // 1) Curl error / exit code error
+  if (err) {
+    console.error("❌ Curl error:", err.message);
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Gagal menghubungi server (curl error).");
+  }
 
-        if (d?.meta?.code !== 200 || !d.data) {
-          console.error('❌ Respons error:', d);
-          const errMsg = d?.message || d?.meta?.message || JSON.stringify(d, null, 2);
-          return resolve(`❌ Respons error:\n${errMsg}`);
-        }
+  // 2) Output kosong / whitespace
+  const out = (stdout || "").trim();
+  if (!out) {
+    console.error("❌ Output kosong dari server.");
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Respon server kosong / tidak valid.");
+  }
 
-        const s = d.data;
+  // 3) Cepat deteksi bukan JSON (opsional tapi bagus)
+  if (!(out.startsWith("{") || out.startsWith("["))) {
+    console.error("❌ Respon bukan JSON. Sample:", out.slice(0, 200));
+    return resolve("❌ Format respon dari server tidak valid (bukan JSON).");
+  }
+
+  // 4) Parse JSON
+  let d;
+  try {
+    d = JSON.parse(out);
+  } catch (e) {
+    console.error("❌ Gagal parsing JSON:", e.message);
+    console.error("🪵 Output:", out.slice(0, 500));
+    return resolve("❌ Format respon dari server tidak valid (JSON rusak).");
+  }
+
+  // 5) Validasi minimal schema
+  if (!d || typeof d !== "object") {
+    console.error("❌ JSON bukan object:", d);
+    return resolve("❌ Respon server tidak valid.");
+  }
+
+  // 6) Error dari backend
+  if (d?.meta?.code !== 200 || !d?.data) {
+    console.error("❌ Respons error:", d);
+    const errMsg =
+      d?.message ||
+      d?.meta?.message ||
+      (typeof d === "string" ? d : JSON.stringify(d));
+    return resolve(`❌ Respons error:\n${errMsg}`);
+  }
+
+  // 7) Sukses, baru lanjut
+  const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
         const msg = `✅ *Change Limit IP TROJAN Account Success!*
 

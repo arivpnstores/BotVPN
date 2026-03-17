@@ -25,29 +25,62 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       const KUOTA = "0"; // jika perlu di-hardcode, bisa diubah jadi parameter juga
       const LIMIT_IP = iplimit;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
 -d '{"expired":${days},"kuota":"${KUOTA}","limitip":"${LIMIT_IP}","password":"${password}","username":"${username}"}'`;
 
-      exec(curlCommand, (_, stdout) => {
-        let d;
-        try {
-          d = JSON.parse(stdout);
-        } catch (e) {
-          console.error('❌ Gagal parsing JSON:', e.message);
-          console.error('🪵 Output:', stdout);
-          return resolve('❌ Format respon dari server tidak valid.');
-        }
+      exec(curlCommand, (err, stdout, stderr) => {
+  // 1) Curl error / exit code error
+  if (err) {
+    console.error("❌ Curl error:", err.message);
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Gagal menghubungi server (curl error).");
+  }
 
-        if (d?.meta?.code !== 200 || !d.data) {
-          console.error('❌ Respons error:', d);
-          const errMsg = d?.message || d?.meta?.message || JSON.stringify(d, null, 2);
-          return resolve(`❌ Respons error:\n${errMsg}`);
-        }
+  // 2) Output kosong / whitespace
+  const out = (stdout || "").trim();
+  if (!out) {
+    console.error("❌ Output kosong dari server.");
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Respon server kosong / tidak valid.");
+  }
 
-        const s = d.data;
+  // 3) Cepat deteksi bukan JSON (opsional tapi bagus)
+  if (!(out.startsWith("{") || out.startsWith("["))) {
+    console.error("❌ Respon bukan JSON. Sample:", out.slice(0, 200));
+    return resolve("❌ Format respon dari server tidak valid (bukan JSON).");
+  }
+
+  // 4) Parse JSON
+  let d;
+  try {
+    d = JSON.parse(out);
+  } catch (e) {
+    console.error("❌ Gagal parsing JSON:", e.message);
+    console.error("🪵 Output:", out.slice(0, 500));
+    return resolve("❌ Format respon dari server tidak valid (JSON rusak).");
+  }
+
+  // 5) Validasi minimal schema
+  if (!d || typeof d !== "object") {
+    console.error("❌ JSON bukan object:", d);
+    return resolve("❌ Respon server tidak valid.");
+  }
+
+  // 6) Error dari backend
+  if (d?.meta?.code !== 200 || !d?.data) {
+    console.error("❌ Respons error:", d);
+    const errMsg =
+      d?.message ||
+      d?.meta?.message ||
+      (typeof d === "string" ? d : JSON.stringify(d));
+    return resolve(`❌ Respons error:\n${errMsg}`);
+  }
+
+  // 7) Sukses, baru lanjut
+  const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 1 && exp <= 135) {
@@ -122,15 +155,15 @@ Upgrade: websocket
 \`
 
 📥 *Download All Config UNLOCK SSH*:
-🔗 https://rajaserverpremium.web.id/config-Indonesia.zip
+🔗 https://rajaserver.web.id/config-Indonesia.zip
 
 📘 *TUTORIAL GANTI SSH*
 📂 Google Drive:
-https://drive.google.com/file/d/1PGjMZcWkjOCjZMBXIlqpTTSRG4lCfYn\_/view?usp=drive\_/link
+https://drive.google.com/file/d/1PGjMZcWkjOCjZMBXIlqpTTSRG4lCfYn/view?usp=sharing
 
 📘 *TUTORIAL BUAT CONFIG MODE SSH*
 📂 Google Drive:
-https://drive.google.com/file/d/1Sj37lUzkizp2-OoriCgVUC1IDRGlP1e3/view?usp=drive\_/link
+https://drive.google.com/file/d/1Sj37lUzkizp2-OoriCgVUC1IDRGlP1e3/view?usp=sharing
 
 📌 *Langkah Singkat:*
 1️⃣ Buka link di atas  
@@ -174,29 +207,62 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       const KUOTA = quota;
       const LIMIT_IP = limitip;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
 -d '{"expired":${days},"kuota":"${KUOTA}","limitip":"${LIMIT_IP}","username":"${username}"}'`;
 
-      exec(curlCommand, (_, stdout) => {
-        let d;
-        try {
-          d = JSON.parse(stdout);
-        } catch (e) {
-          console.error('❌ Gagal parsing JSON:', e.message);
-          console.error('🪵 Output:', stdout);
-          return resolve('❌ Format respon dari server tidak valid.');
-        }
+      exec(curlCommand, (err, stdout, stderr) => {
+  // 1) Curl error / exit code error
+  if (err) {
+    console.error("❌ Curl error:", err.message);
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Gagal menghubungi server (curl error).");
+  }
 
-        if (d?.meta?.code !== 200 || !d.data) {
-          console.error('❌ Respons error:', d);
-          const errMsg = d?.message || d?.meta?.message || JSON.stringify(d, null, 2);
-          return resolve(`❌ Respons error:\n${errMsg}`);
-        }
+  // 2) Output kosong / whitespace
+  const out = (stdout || "").trim();
+  if (!out) {
+    console.error("❌ Output kosong dari server.");
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Respon server kosong / tidak valid.");
+  }
 
-        const s = d.data;
+  // 3) Cepat deteksi bukan JSON (opsional tapi bagus)
+  if (!(out.startsWith("{") || out.startsWith("["))) {
+    console.error("❌ Respon bukan JSON. Sample:", out.slice(0, 200));
+    return resolve("❌ Format respon dari server tidak valid (bukan JSON).");
+  }
+
+  // 4) Parse JSON
+  let d;
+  try {
+    d = JSON.parse(out);
+  } catch (e) {
+    console.error("❌ Gagal parsing JSON:", e.message);
+    console.error("🪵 Output:", out.slice(0, 500));
+    return resolve("❌ Format respon dari server tidak valid (JSON rusak).");
+  }
+
+  // 5) Validasi minimal schema
+  if (!d || typeof d !== "object") {
+    console.error("❌ JSON bukan object:", d);
+    return resolve("❌ Respon server tidak valid.");
+  }
+
+  // 6) Error dari backend
+  if (d?.meta?.code !== 200 || !d?.data) {
+    console.error("❌ Respons error:", d);
+    const errMsg =
+      d?.message ||
+      d?.meta?.message ||
+      (typeof d === "string" ? d : JSON.stringify(d));
+    return resolve(`❌ Respons error:\n${errMsg}`);
+  }
+
+  // 7) Sukses, baru lanjut
+  const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 1 && exp <= 135) {
@@ -257,7 +323,7 @@ if (exp >= 1 && exp <= 135) {
 
 📘 *TUTORIAL BUAT CONFIG MODE VMESS VLESS TROJAN*
 📂 Google Drive:
-https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=drive\_/link
+https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=sharing
 
 📌 *Langkah Singkat:*
 1️⃣ Buka link di atas  
@@ -300,29 +366,62 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       const KUOTA = quota;
       const LIMIT_IP = limitip;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
 -d '{"expired":${days},"kuota":"${KUOTA}","limitip":"${LIMIT_IP}","username":"${username}"}'`;
 
-      exec(curlCommand, (_, stdout) => {
-        let d;
-        try {
-          d = JSON.parse(stdout);
-        } catch (e) {
-          console.error('❌ Gagal parsing JSON:', e.message);
-          console.error('🪵 Output:', stdout);
-          return resolve('❌ Format respon dari server tidak valid.');
-        }
+      exec(curlCommand, (err, stdout, stderr) => {
+  // 1) Curl error / exit code error
+  if (err) {
+    console.error("❌ Curl error:", err.message);
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Gagal menghubungi server (curl error).");
+  }
 
-        if (d?.meta?.code !== 200 || !d.data) {
-          console.error('❌ Respons error:', d);
-          const errMsg = d?.message || d?.meta?.message || JSON.stringify(d, null, 2);
-          return resolve(`❌ Respons error:\n${errMsg}`);
-        }
+  // 2) Output kosong / whitespace
+  const out = (stdout || "").trim();
+  if (!out) {
+    console.error("❌ Output kosong dari server.");
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Respon server kosong / tidak valid.");
+  }
 
-        const s = d.data;
+  // 3) Cepat deteksi bukan JSON (opsional tapi bagus)
+  if (!(out.startsWith("{") || out.startsWith("["))) {
+    console.error("❌ Respon bukan JSON. Sample:", out.slice(0, 200));
+    return resolve("❌ Format respon dari server tidak valid (bukan JSON).");
+  }
+
+  // 4) Parse JSON
+  let d;
+  try {
+    d = JSON.parse(out);
+  } catch (e) {
+    console.error("❌ Gagal parsing JSON:", e.message);
+    console.error("🪵 Output:", out.slice(0, 500));
+    return resolve("❌ Format respon dari server tidak valid (JSON rusak).");
+  }
+
+  // 5) Validasi minimal schema
+  if (!d || typeof d !== "object") {
+    console.error("❌ JSON bukan object:", d);
+    return resolve("❌ Respon server tidak valid.");
+  }
+
+  // 6) Error dari backend
+  if (d?.meta?.code !== 200 || !d?.data) {
+    console.error("❌ Respons error:", d);
+    const errMsg =
+      d?.message ||
+      d?.meta?.message ||
+      (typeof d === "string" ? d : JSON.stringify(d));
+    return resolve(`❌ Respons error:\n${errMsg}`);
+  }
+
+  // 7) Sukses, baru lanjut
+  const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 1 && exp <= 135) {
@@ -382,7 +481,7 @@ if (exp >= 1 && exp <= 135) {
 
 📘 *TUTORIAL BUAT CONFIG MODE VMESS VLESS TROJAN*
 📂 Google Drive:
-https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=drive\_/link
+https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=sharing
 
 📌 *Langkah Singkat:*
 1️⃣ Buka link di atas  
@@ -424,29 +523,62 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       const KUOTA = quota;
       const LIMIT_IP = limitip;
 
-      const curlCommand = `curl -s -X POST "${web_URL}" \
+      const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
 -d '{"expired":${days},"kuota":"${KUOTA}","limitip":"${LIMIT_IP}","username":"${username}"}'`;
 
-      exec(curlCommand, (_, stdout) => {
-        let d;
-        try {
-          d = JSON.parse(stdout);
-        } catch (e) {
-          console.error('❌ Gagal parsing JSON:', e.message);
-          console.error('🪵 Output:', stdout);
-          return resolve('❌ Format respon dari server tidak valid.');
-        }
+      exec(curlCommand, (err, stdout, stderr) => {
+  // 1) Curl error / exit code error
+  if (err) {
+    console.error("❌ Curl error:", err.message);
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Gagal menghubungi server (curl error).");
+  }
 
-        if (d?.meta?.code !== 200 || !d.data) {
-          console.error('❌ Respons error:', d);
-          const errMsg = d?.message || d?.meta?.message || JSON.stringify(d, null, 2);
-          return resolve(`❌ Respons error:\n${errMsg}`);
-        }
+  // 2) Output kosong / whitespace
+  const out = (stdout || "").trim();
+  if (!out) {
+    console.error("❌ Output kosong dari server.");
+    if (stderr) console.error("🪵 stderr:", stderr);
+    return resolve("❌ Respon server kosong / tidak valid.");
+  }
 
-        const s = d.data;
+  // 3) Cepat deteksi bukan JSON (opsional tapi bagus)
+  if (!(out.startsWith("{") || out.startsWith("["))) {
+    console.error("❌ Respon bukan JSON. Sample:", out.slice(0, 200));
+    return resolve("❌ Format respon dari server tidak valid (bukan JSON).");
+  }
+
+  // 4) Parse JSON
+  let d;
+  try {
+    d = JSON.parse(out);
+  } catch (e) {
+    console.error("❌ Gagal parsing JSON:", e.message);
+    console.error("🪵 Output:", out.slice(0, 500));
+    return resolve("❌ Format respon dari server tidak valid (JSON rusak).");
+  }
+
+  // 5) Validasi minimal schema
+  if (!d || typeof d !== "object") {
+    console.error("❌ JSON bukan object:", d);
+    return resolve("❌ Respon server tidak valid.");
+  }
+
+  // 6) Error dari backend
+  if (d?.meta?.code !== 200 || !d?.data) {
+    console.error("❌ Respons error:", d);
+    const errMsg =
+      d?.message ||
+      d?.meta?.message ||
+      (typeof d === "string" ? d : JSON.stringify(d));
+    return resolve(`❌ Respons error:\n${errMsg}`);
+  }
+
+  // 7) Sukses, baru lanjut
+  const s = d.data;
         console.log("⚠️ FULL DATA:", JSON.stringify(d, null, 2));
 // ======= MULAI LOGIKA UPDATE total_create_akun =======
 if (exp >= 1 && exp <= 135) {
@@ -502,7 +634,7 @@ if (exp >= 1 && exp <= 135) {
 
 📘 *TUTORIAL BUAT CONFIG MODE VMESS VLESS TROJAN*
 📂 Google Drive:
-https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=drive\_/link
+https://drive.google.com/file/d/1SmgoAUjTf9tt297deVkn6cd7ZOuha62a/view?usp=sharing
 
 📌 *Langkah Singkat:*
 1️⃣ Buka link di atas  

@@ -157,7 +157,7 @@ const bot = new Telegraf(BOT_TOKEN);
 let ADMIN_USERNAME = '@ARI_VPN_STORE';
 const adminIds = ADMIN;
 logger.info('Bot initialized');
-
+/*
 (async () => {
   try {
     const adminId = Array.isArray(adminIds) ? adminIds[0] : adminIds;
@@ -169,7 +169,7 @@ logger.info('Bot initialized');
     logger.warn('Tidak bisa ambil username admin otomatis.');
   }
 })();
-//
+*/
 const db = new sqlite3.Database('./sellvpn.db', (err) => {
   if (err) {
     logger.error('Kesalahan koneksi SQLite3:', err.message);
@@ -1740,7 +1740,7 @@ bot.action('renew_ssh', async (ctx) => {
 async function startSelectServer(ctx, action, type, page = 0) {
   try {
     const isR = await isUserReseller(ctx.from.id);
-    const query = 'SELECT * FROM Server';
+    const query = 'SELECT * FROM Server ORDER BY nama_server ASC';
 
     db.all(query, [], (err, servers) => {
       if (err) {
@@ -4003,7 +4003,7 @@ async function processDeposit(ctx, amount) {
 
     // ===== CREATE QRIS (CURL -4) =====
     const createCmd =
-      `curl -4 -sS -L --get "https://api.rajaserverpremium.web.id/orderkuota/createpayment" ` +
+      `curl -4 -sS -L --get "https://api.rajaserver.web.id/orderkuota/createpayment" ` +
       `--data-urlencode "apikey=${auth_apikey}" ` +
       `--data-urlencode "amount=${finalAmount}" ` +
       `--data-urlencode "codeqr=${urlQr}"`;
@@ -4091,9 +4091,9 @@ const qrMessage = await ctx.reply(caption, {
 }
 
 const SOCKS_POOL = [
-'aristore:1447@idtechno.rajaserverpremium.web.id:1080',
-'aristore:1447@idtechno2.rajaserverpremium.web.id:1080',
-'aristore:1447@idbiznet.rajaserverpremium.web.id:1080',
+'aristore:1447@idtechno.rajavpn.web.id:1080',
+'aristore:1447@idtechno2.rajavpn.web.id:1080',
+'aristore:1447@idbiznet.rajavpn.web.id:1080',
 ];
 
 function getRandomProxy() {
@@ -4114,7 +4114,6 @@ function cekQRISOrderKuota() {
 
     const curlCmd = `
 curl --silent --compressed \
-  --connect-timeout 10 --max-time 20 \
   --socks5-hostname '${hostport}' \
   --proxy-user '${user}:${pass}' \
   -X POST '${WEB_MUTASI}' \
