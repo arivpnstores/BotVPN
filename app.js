@@ -4107,7 +4107,13 @@ async function checkQRISStatus() {
       }
     );
 
-    const list = res.data?.data?.transactions || [];
+const rawList = res.data?.data?.transactions || [];
+const now = Date.now();
+const maxAge = 60 * 60 * 1000; // 1 jam
+const list = rawList.filter(tx => {
+  const txTime = new Date(tx.time).getTime();
+  return now - txTime <= maxAge;
+});
 
     logger.info(`📦 Total trx GOPAY: ${list.length}`);
 
@@ -4403,6 +4409,7 @@ app.listen(port, () => {
       logger.info('Bot telah dimulai');
   }).catch((error) => {
       logger.error('Error saat memulai bot:', error);
+      process.exit(1); // keluar biar direstart
   });
   logger.info(`Server berjalan di port ${port}`);
 });
