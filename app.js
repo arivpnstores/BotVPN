@@ -4003,7 +4003,7 @@ async function processDeposit(ctx, amount) {
 
     // ===== CREATE QRIS (CURL -4) =====
     const createCmd =
-      `curl -4 -sS -L --get "https://api.rajaserver.web.id/orderkuota/createpayment" ` +
+      `curl -4 -sS -L --get "https://api.rajaserver.web.id/gopaymerchat/createpayment" ` +
       `--data-urlencode "apikey=${auth_apikey}" ` +
       `--data-urlencode "amount=${finalAmount}" ` +
       `--data-urlencode "codeqr=${urlQr}"`;
