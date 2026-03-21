@@ -160,12 +160,6 @@ service cron restart
             echo -e "${red}AUTH_PAYMET_GETWAY tidak boleh kosong. Silakan coba lagi.${neutral}"
         fi
     done
-    while [ -z "$web_mutasi" ]; do
-        read -p "Masukkan web_mutasi : " web_mutasi
-        if [ -z "$web_mutasi" ]; then
-            echo -e "${red}web_mutasi tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
     while [ -z "$groupid" ]; do
         read -p "Masukkan ID GROUP NOTIF : " groupid
         if [ -z "$groupid" ]; then
