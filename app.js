@@ -148,10 +148,10 @@ const ADMIN = vars.USER_ID;
 const NAMA_STORE = vars.NAMA_STORE || '@ARI_VPN_STORE';
 const DATA_QRIS = vars.DATA_QRIS;
 const GROUP_ID = vars.GROUP_ID;
-const APIKEY = vars.auth_paymet_getway;       // apikey gateway
-const AUTH_USER = vars.auth_username_mutasi;  // username orderkuota
-const AUTH_TOKEN = vars.auth_token_mutasi;    // token orderkuota
-const WEB_MUTASI = vars.web_mutasi;           // https://app.orderkuota.com/api/v2/qris/mutasi/ACCOUNT_ID
+const APIKEY = vars.AUTH_PAYMET_GETWAY;       // apikey gateway
+const GOPAY_API = "https://gopay.autoftbot.com/api/backend/transactions";
+const GOPAY_KEY = vars.GOPAY_KEY;
+const MERCHANT_ID = vars.MERCHANT_ID;
 
 const bot = new Telegraf(BOT_TOKEN);
 let ADMIN_USERNAME = '@ARI_VPN_STORE';
@@ -2787,7 +2787,7 @@ bot.action('restart_bot', async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.reply('♻️ Restarting bot, Please wait...');
 
-  exec("pm2 restart all", (error, stdout, stderr) => {
+  exec("pm2 restart sellvpn sellzivpn sellsc sellapp", (error, stdout, stderr) => {
     if (error) {
       return ctx.reply(`❌ Gagal restart bot:\n${error.message}`);
     }
@@ -4090,150 +4090,79 @@ const qrMessage = await ctx.reply(caption, {
   }
 }
 
-const SOCKS_POOL = [
-'aristore:1447@idtechno.rajavpn.web.id:1080',
-'aristore:1447@idtechno2.rajavpn.web.id:1080',
-'aristore:1447@idbiznet.rajavpn.web.id:1080',
-];
-
-function getRandomProxy() {
-  return SOCKS_POOL[Math.floor(Math.random() * SOCKS_POOL.length)];
-}
-
-function parseSocks(proxyStr) {
-  // "user:pass@host:port"
-  const [auth, hostport] = proxyStr.split('@');
-  const [user, pass] = auth.split(':');
-  return { hostport, user, pass };
-}
-
-// ===== CEK QRIS (ORDERKUOTA – VIA CURL SIMPLE) =====
-function cekQRISOrderKuota() {
-  return new Promise((resolve, reject) => {
-    const { hostport, user, pass } = parseSocks(getRandomProxy());
-
-    const curlCmd = `
-curl --silent --compressed \
-  --socks5-hostname '${hostport}' \
-  --proxy-user '${user}:${pass}' \
-  -X POST '${WEB_MUTASI}' \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -H 'Accept-Encoding: gzip' \
-  -H 'User-Agent: okhttp/4.12.0' \
-  --data-urlencode 'requests[qris_history][page]=1' \
-  --data-urlencode 'auth_username=${AUTH_USER}' \
-  --data-urlencode 'auth_token=${AUTH_TOKEN}'
-`.trim();
-
-    exec(curlCmd, { maxBuffer: 1024 * 1024 * 5 }, (err, stdout) => {
-      const out = (stdout || '').trim();
-     logger.info(`[QRIS]: ${stdout}`);
-
-      // kalau ada output, coba parse dulu (anggap sukses walau err)
-      if (out) {
-        try {
-          return resolve(JSON.parse(out));
-        } catch (e) {
-          // output ada tapi bukan JSON
-          return reject(new Error(`Invalid JSON: ${out.slice(0, 200)}`));
-        }
-      }
-
-      // stdout kosong => baru anggap gagal
-      return reject(err || new Error('Empty response from curl'));
-    });
-  });
-}
-
-// ===== AMBIL TX BY KREDIT (AMOUNT) =====
-function findTxByKredit(qrisData, amount) {
-  const list = qrisData?.qris_history?.results || [];
-  const target = Number(amount);
-
-  return list.find((tx) => {
-    const kredit = Number(String(tx.kredit || '0').replace(/\./g, ''));
-    return kredit === target && String(tx.status || '').toUpperCase() === 'IN';
-  }) || null;
-}
-
-// ===== LOOP CEK QRIS =====
 async function checkQRISStatus() {
   try {
     const pendingDeposits = Object.entries(global.pendingDeposits);
+
+    // 🔥 ambil data sekali (lebih hemat request)
+    const res = await axios.post(
+      GOPAY_API,
+      { merchant_id: MERCHANT_ID },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${GOPAY_KEY}`
+        },
+        timeout: 15000
+      }
+    );
+
+    const list = res.data?.data?.transactions || [];
+
+    logger.info(`📦 Total trx GOPAY: ${list.length}`);
 
     for (const [uniqueCode, deposit] of pendingDeposits) {
       if (deposit.status !== 'pending') continue;
 
       const depositAge = Date.now() - deposit.timestamp;
+
+      // EXPIRED
       if (depositAge > 60 * 60 * 1000) {
         try {
           if (deposit.qrMessageId) {
             await bot.telegram.deleteMessage(deposit.userId, deposit.qrMessageId);
           }
+
           await bot.telegram.sendMessage(
             deposit.userId,
-            '❌ *Pembayaran Expired*\n\nWaktu pembayaran telah habis. Silakan klik Top Up lagi untuk mendapatkan QR baru.',
+            '❌ *Pembayaran Expired*\n\nSilakan klik Top Up lagi.',
             { parse_mode: 'Markdown' }
           );
         } catch (err) {
-          logger.error('Error deleting expired payment messages:', err);
+          logger.error('Error delete expired:', err);
         }
 
         delete global.pendingDeposits[uniqueCode];
-        db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode], (err) => {
-          if (err) logger.error('Gagal hapus pending_deposits (expired):', err.message);
-        });
+        db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
         continue;
       }
 
-      try {
-        const expectedAmount = Number(deposit.amount);
+      const target = Number(deposit.amount);
 
-        // ✅ ambil mutasi orderkuota (via curl + proxy)
-        const qrisData = await cekQRISOrderKuota();
+      const found = list.find(tx =>
+        Number(tx.amount) === target &&
+        String(tx.status).toLowerCase() === "settlement"
+      );
 
-        if (!qrisData?.success || !qrisData?.qris_history?.success) {
-          logger.warn(`OrderKuota invalid for ${uniqueCode}: ${JSON.stringify(qrisData)}`);
-          continue;
-        }
+      if (!found) {
+        logger.info(`⏳ Pending | ${uniqueCode}`);
+        continue;
+      }
 
-        const matchedTx = findTxByKredit(qrisData, expectedAmount);
+      logger.info(`💰 MATCH | ${uniqueCode} | TRX=${found.id}`);
 
-        if (!matchedTx) {
-          logger.info(`⏳ Payment pending for ${uniqueCode} (amount=${expectedAmount})`);
-          continue;
-        }
+      const success = await processMatchingPayment(deposit, found, uniqueCode);
 
-        const success = await processMatchingPayment(deposit, matchedTx, uniqueCode);
-        if (success) {
-          logger.info(`✅ Payment processed successfully for ${uniqueCode}`);
+      if (success) {
+        logger.info(`✅ Payment success | ${uniqueCode}`);
 
-  // ==============================
-  // AUTO RUN WD PYTHON
-  // ==============================
-  exec(
-    '/usr/bin/python3 /root/BotVPN/wd.py >> /root/BotVPN/wd.log 2>&1',
-    { timeout: 60_000 }, // max 60 detik biar aman
-    (error) => {
-      if (error) {
-        logger.error('❌ WD.py error:', error.message);
-      } else {
-        logger.info('✅ WD.py executed successfully');
+        delete global.pendingDeposits[uniqueCode];
+        db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
       }
     }
-  );
-  
-          delete global.pendingDeposits[uniqueCode];
-          db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode], (err) => {
-            if (err) logger.error('Gagal hapus pending_deposits (success):', err.message);
-          });
-        }
-      } catch (error) {
-        logger.error(`Error checking payment status for ${uniqueCode}:`, error?.message || error);
-      }
-    }
+
   } catch (error) {
-    logger.error('Error in checkQRISStatus:', error?.message || error);
+    logger.error('❌ Error checkQRISStatus:', error?.response?.data || error.message);
   }
 }
 

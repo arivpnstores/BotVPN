@@ -5,17 +5,15 @@ sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.di
 ```
 ## UPDATE
 ```bash
-curl -sSL https://raw.githubusercontent.com/arivpnstores/BotVPN/main/update.sh -o update.sh && chmod +x update.sh && bash update.sh
+curl --connect-timeout 1 --max-time 3SL https://raw.githubusercontent.com/arivpnstores/BotVPN/main/update.sh -o update.sh && chmod +x update.sh && bash update.sh
 ```
 <img src="./ss.png" alt="image" width="500"/>
 
-## DATA QRIS DI DAPAT KAN DARI FOTO QRIS ORDER KUOTA
-https://scanqr.org/
-
 ## CEK PEMBAYARAN 
-TUTORIAL AMBIL API CEK PEMBAYARAN VIA VIDIO : [Google Drive](https://drive.google.com/file/d/1ugR_N5gEtcLx8TDsf7ecTFqYY3zrlHn-/view?usp=drivesdk
+https://gopay.autoftbot.com/
+SILAHKAN DONASI KE PADA ADMIN AUTOFT JIKA INI BERMANFAT
 ```bash
-ambil username, auth_token, web_mutasi 
+AMBIL MERCHANT_ID, GOPAY_KEY, QR STRING 
 ```
 
 ## TAMPILAN SC BotVPN POTATO 
