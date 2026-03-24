@@ -151,7 +151,7 @@ const GROUP_ID = vars.GROUP_ID;
 // PAYMENT GATEWAY
 const APIKEY = vars.AUTH_PAYMET_GETWAY;       // apikey gateway
 // V1 GOPAY
-const GOPAY_API = "https://gopay.autoftbot.com/api/backend/transactions";
+const GOPAY_API = "https://api-gopay.autoftbot.com/transactions";
 const GOPAY_KEY = vars.GOPAY_KEY;
 const MERCHANT_ID = vars.MERCHANT_ID;
 // V2 ORKUT
