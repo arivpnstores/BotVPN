@@ -20,12 +20,12 @@ SOCKS_POOL = [
 ]
 
 SETTINGS = {
-    "qris": "00020101021126670016COM.NOBUBANK.WWW01189360050300000879140214420223928056940303UMI51440014ID.CO.QRIS.WWW0215ID20253832987880303UMI5204541153033605802ID5919ARI STORE OK15407796006SLEMAN61055526462070703A0163045089",
+    "qris": "-",
     "web_payment_getway": "api.rajaserver.web.id",
-    "apikey_paymet_getway": "AriPaymentGatewayVersion2026",
-    "web_mutasi": "https://app.orderkuota.com/api/v2/qris/mutasi/1540779",
-    "auth_username_mutasi": "arivpnstore",
-    "auth_token_mutasi": "1540779:fay5iZtNeIqKcrWPxSCGTs2o41Jj7hEm",
+    "apikey_paymet_getway": "-",
+    "web_mutasi": "https://app.orderkuota.com/api/v2/qris/mutasi/-",
+    "auth_username_mutasi": "-",
+    "auth_token_mutasi": "-",
 }
 
 # WD endpoint + headers “signature” (PAKAI PUNYA KAMU)
