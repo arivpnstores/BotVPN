@@ -73,81 +73,101 @@ npm install -g pm2
 }
 
 server_app() {
-    clear
-    echo -e "${orange}─────────────────────────────────────────${neutral}"
-    echo -e "   ${green}.:::. BOT SELLVPN TELEGRAM .:::.   ${neutral}"
-    echo -e "${orange}─────────────────────────────────────────${neutral}"
-    echo -e "       ${green}•${neutral} server create user"
-    echo -e "       ${green}•${neutral} server renew user"
-    echo -e "       ${green}•${neutral} server lock user"
-    echo -e "       ${green}•${neutral} server unlock user"
-    echo -e "       ${green}•${neutral} server delete user"
-    echo -e "       ${green}•${neutral} server addressel user"
-    echo -e "       ${green}•${neutral} server addsaldo user"
-    echo -e "       ${green}•${neutral} server ceksaldo user"
-    echo -e "${orange}─────────────────────────────────────────${neutral}"
-    read -p "Masukkan token bot: " token
-    while [ -z "$token" ]; do
-        read -p "Masukkan token bot: " token
-        if [ -z "$token" ]; then
-            echo -e "${red}Token bot tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
-    while [ -z "$adminid" ]; do
-        read -p "Masukkan admin ID: " adminid
-        if [ -z "$adminid" ]; then
-            echo -e "${red}Admin ID tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
-    while [ -z "$namastore" ]; do
-        read -p "Masukkan nama store: " namastore
-        if [ -z "$namastore" ]; then
-            echo -e "${red}Nama store tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
-    while [ -z "$dataqris" ]; do
-        read -p "Masukkan DATA QRIS: " dataqris
-        if [ -z "$dataqris" ]; then
-            echo -e "${red}DATA QRIS tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
-    while [ -z "$GOPAY_KEY" ]; do
-        read -p "Masukkan GOPAY_KEY : " GOPAY_KEY
-        if [ -z "$GOPAY_KEY" ]; then
-            echo -e "${red}GOPAY_KEY tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
-    while [ -z "$MERCHANT_ID" ]; do
-        read -p "Masukkan MERCHANT_ID : " MERCHANT_ID
-        if [ -z "$MERCHANT_ID" ]; then
-            echo -e "${red}MERCHANT_ID tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
-    while [ -z "$AUTH_PAYMET_GETWAY" ]; do
-        read -p "Masukkan AUTH_PAYMET_GETWAY : " AUTH_PAYMET_GETWAY
-        if [ -z "$AUTH_PAYMET_GETWAY" ]; then
-            echo -e "${red}AUTH_PAYMET_GETWAY tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
-    while [ -z "$groupid" ]; do
-        read -p "Masukkan ID GROUP NOTIF : " groupid
-        if [ -z "$groupid" ]; then
-            echo -e "${red}DATA QRIS tidak boleh kosong. Silakan coba lagi.${neutral}"
-        fi
-    done
-    rm -f /root/BotVPN/.vars.json
-    echo "{
+clear
+echo -e "${orange}─────────────────────────────────────────${neutral}"
+echo -e "   ${green}.:::. BOT SELLVPN TELEGRAM .:::.   ${neutral}"
+echo -e "${orange}─────────────────────────────────────────${neutral}"
+echo -e "       ${green}•${neutral} server create user"
+echo -e "       ${green}•${neutral} server renew user"
+echo -e "       ${green}•${neutral} server lock user"
+echo -e "       ${green}•${neutral} server unlock user"
+echo -e "       ${green}•${neutral} server delete user"
+echo -e "       ${green}•${neutral} server addsaldo user"
+echo -e "       ${green}•${neutral} server ceksaldo user"
+echo -e "${orange}─────────────────────────────────────────${neutral}"
+
+# INPUT UMUM
+read -p "Masukkan token bot: " token
+while [ -z "$token" ]; do
+  echo "Token tidak boleh kosong!"
+  read -p "Masukkan token bot: " token
+done
+
+read -p "Masukkan admin ID: " adminid
+read -p "Masukkan nama store: " namastore
+read -p "Masukkan ID GROUP NOTIF: " groupid
+
+# PILIH PAYMENT
+echo ""
+echo "Pilih Payment Gateway:"
+echo "1. GoPay"
+echo "2. Orkut"
+read -p "Masukkan pilihan (1/2): " pilihan
+
+# VALIDASI
+while [[ "$pilihan" != "1" && "$pilihan" != "2" ]]; do
+  echo "Pilihan tidak valid!"
+  read -p "Masukkan pilihan (1/2): " pilihan
+done
+
+# ========================
+# GOPAY
+# ========================
+if [ "$pilihan" == "1" ]; then
+  echo "=== Setup GoPay ==="
+  
+  read -p "Masukkan DATA QRIS: " dataqris
+  read -p "Masukkan GOPAY_KEY: " GOPAY_KEY
+  read -p "Masukkan MERCHANT_ID: " MERCHANT_ID
+  read -p "Masukkan AUTH_PAYMET_GETWAY: " AUTH_PAYMET_GETWAY
+
+  rm -f /root/BotVPN/.vars.json
+  echo "{
   \"BOT_TOKEN\": \"$token\",
   \"USER_ID\": \"$adminid\",
   \"NAMA_STORE\": \"$namastore\",
   \"GROUP_ID\": \"$groupid\",
   \"PORT\": \"6969\",
+  \"PAYMENT\": \"GOPAY\",
   \"DATA_QRIS\": \"$dataqris\",
   \"GOPAY_KEY\": \"$GOPAY_KEY\",
   \"MERCHANT_ID\": \"$MERCHANT_ID\",
-  \"AUTH_PAYMET_GETWAY\": \"$AUTH_PAYMET_GETWAY\",
-  \"web_mutasi\": \"$web_mutasi\"
+  \"AUTH_PAYMET_GETWAY\": \"$AUTH_PAYMET_GETWAY\"
 }" >/root/BotVPN/.vars.json
+
+fi
+
+# ========================
+# ORKUT
+# ========================
+if [ "$pilihan" == "2" ]; then
+  echo "=== Setup Orkut ==="
+
+  read -p "Masukkan DATA QRIS ORKUT: " DATA_QRIS_ORKUT
+  read -p "Masukkan AUTH USERNAME: " AUTH_USERNAME_ORKUT
+  read -p "Masukkan AUTH TOKEN: " AUTH_TOKEN_ORKUT
+  read -p "Masukkan WEB MUTASI: " WEB_MUTILASI_ORKUT
+  read -p "Masukkan AUTH_PAYMET_GETWAY: " AUTH_PAYMET_GETWAY
+
+  rm -f /root/BotVPN/.vars.json
+  echo "{
+  \"BOT_TOKEN\": \"$token\",
+  \"USER_ID\": \"$adminid\",
+  \"NAMA_STORE\": \"$namastore\",
+  \"GROUP_ID\": \"$groupid\",
+  \"PORT\": \"6969\",
+  \"PAYMENT\": \"ORKUT\",
+  \"DATA_QRIS_ORKUT\": \"$DATA_QRIS_ORKUT\",
+  \"AUTH_USERNAME_ORKUT\": \"$AUTH_USERNAME_ORKUT\",
+  \"AUTH_TOKEN_ORKUT\": \"$AUTH_TOKEN_ORKUT\",
+  \"WEB_MUTILASI_ORKUT\": \"$WEB_MUTILASI_ORKUT\",
+  \"AUTH_PAYMET_GETWAY\": \"$AUTH_PAYMET_GETWAY\"
+}" >/root/BotVPN/.vars.json
+
+fi
+
+echo ""
+echo "✅ Setup selesai!"
 
 cd /root/BotVPN
 pm2 start ecosystem.config.js

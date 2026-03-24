@@ -1,12 +1,16 @@
 {
-  "BOT_TOKEN": "ISI_MANUAL",
-  "USER_ID": "ISI_MANUAL",
-  "NAMA_STORE": "ISI_MANUAL",
-  "GROUP_ID": "ISI_MANUAL",
+  "BOT_TOKEN": "-",
+  "USER_ID": "-",
+  "NAMA_STORE": "-",
+  "GROUP_ID": "-",
   "PORT": "6969",
-  "DATA_QRIS": "ISI_MANUAL",
-  "auth_username_mutasi": "ISI_MANUAL",
-  "auth_token_mutasi": "ISI_MANUAL",
-  "auth_paymet_getway": "ISI_MANUAL",
-  "web_mutasi": "https://app.orderkuota.com/api/v2/qris/mutasi/ISI_MANUAL"
+  "PAYMENT": "-",
+  "DATA_QRIS": "-",
+  "MERCHANT_ID": "-",
+  "GOPAY_KEY": "-",
+  "AUTH_PAYMET_GETWAY": "-",
+  "DATA_QRIS_ORKUT": "-",
+  "AUTH_USERNAME_ORKUT": "-",
+  "AUTH_TOKEN_ORKUT": "-",
+  "WEB_MUTILASI_ORKUT": "https://app.orderkuota.com/api/v2/qris/mutasi/-"
 }

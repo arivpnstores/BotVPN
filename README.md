@@ -9,13 +9,24 @@ curl --connect-timeout 1 --max-time 3SL https://raw.githubusercontent.com/arivpn
 ```
 <img src="./ss.png" alt="image" width="500"/>
 
-## CEK PEMBAYARAN 
+## DUAL METHODE AUTO PAYMET
+-
+## CEK PEMBAYARAN GOPAY
 https://gopay.autoftbot.com/
 SILAHKAN DONASI KE PADA ADMIN AUTOFT JIKA INI BERMANFAT
 ```bash
 AMBIL MERCHANT_ID, GOPAY_KEY, QR STRING 
 ```
+-
+## DATA QRIS ORDER KUOTA
+https://scanqr.org/
 
+## CEK PEMBAYARAN ORKUT 
+TUTORIAL AMBIL API CEK PEMBAYARAN VIA VIDIO : https://drive.google.com/file/d/1ugR_N5gEtcLx8TDsf7ecTFqYY3zrlHn-/view?usp=drivesdk
+```bash
+ambil username, auth_token, web_mutasi 
+```
+-
 ## TAMPILAN SC BotVPN POTATO 
 <img src="./ss2.png" alt="image" width="300"/>
 

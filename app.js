@@ -148,10 +148,16 @@ const ADMIN = vars.USER_ID;
 const NAMA_STORE = vars.NAMA_STORE || '@ARI_VPN_STORE';
 const DATA_QRIS = vars.DATA_QRIS;
 const GROUP_ID = vars.GROUP_ID;
+// PAYMENT GATEWAY
 const APIKEY = vars.AUTH_PAYMET_GETWAY;       // apikey gateway
+// V1 GOPAY
 const GOPAY_API = "https://gopay.autoftbot.com/api/backend/transactions";
 const GOPAY_KEY = vars.GOPAY_KEY;
 const MERCHANT_ID = vars.MERCHANT_ID;
+// V2 ORKUT
+const AUTH_USER = vars.AUTH_USERNAME_ORKUT;  // username orderkuota
+const AUTH_TOKEN = vars.AUTH_TOKEN_ORKUT;    // token orderkuota
+const WEB_MUTASI = vars.WEB_MUTILASI_ORKUT;           // https://app.orderkuota.com/api/v2/qris/mutasi/ACCOUNT_ID
 
 const bot = new Telegraf(BOT_TOKEN);
 let ADMIN_USERNAME = '@ARI_VPN_STORE';
@@ -4002,11 +4008,22 @@ async function processDeposit(ctx, amount) {
       });
 
     // ===== CREATE QRIS (CURL -4) =====
+if (vars.PAYMENT === "GOPAY") {
+  createUrl = "https://api.rajaserver.web.id/gopaymerchat/createpayment";
+  apiKey = vars.AUTH_PAYMET_GETWAY;
+  codeQr = vars.DATA_QRIS;
+}
+
+else if (vars.PAYMENT === "ORKUT") {
+  createUrl = "https://api.rajaserver.web.id/orderkuota/createpayment"; 
+  apiKey = vars.AUTH_PAYMET_GETWAY; 
+  codeQr = vars.DATA_QRIS_ORKUT;
+}
     const createCmd =
-      `curl -4 -sS -L --get "https://api.rajaserver.web.id/gopaymerchat/createpayment" ` +
-      `--data-urlencode "apikey=${auth_apikey}" ` +
+      `curl -4 -sS -L --get "${createUrl}" ` +
+      `--data-urlencode "apikey=${apiKey}" ` +
       `--data-urlencode "amount=${finalAmount}" ` +
-      `--data-urlencode "codeqr=${urlQr}"`;
+      `--data-urlencode "codeqr=${codeQr}"`;
 
     const out = await execP(createCmd, { maxBuffer: 5 * 1024 * 1024 });
 
@@ -4090,85 +4107,252 @@ const qrMessage = await ctx.reply(caption, {
   }
 }
 
-async function checkQRISStatus() {
-  try {
-    const pendingDeposits = Object.entries(global.pendingDeposits);
+async function checkQRISStatusOrkut() {
+  const { exec } = require('child_process');
 
-    // 🔥 ambil data sekali (lebih hemat request)
-    const res = await axios.post(
-      GOPAY_API,
-      { merchant_id: MERCHANT_ID },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${GOPAY_KEY}`
-        },
-        timeout: 15000
-      }
-    );
+  const normalize = v => Number(String(v || '').replace(/[^\d]/g, '')) || 0;
 
-const rawList = res.data?.data?.transactions || [];
-const now = Date.now();
-const maxAge = 60 * 60 * 1000; // 1 jam
-const list = rawList.filter(tx => {
-  const txTime = new Date(tx.time).getTime();
-  return now - txTime <= maxAge;
-});
+  const log = (msg) => logger.info(`[QRIS] ${msg}`);
+  const warn = (msg) => logger.warn(`[QRIS] ${msg}`);
+  const errLog = (msg) => logger.error(`[QRIS] ${msg}`);
 
-    logger.info(`📦 Total trx GOPAY: ${list.length}`);
+  // 🔥 PROXY FIX (INLINE AUTH)
+  const PROXY = 'aristore:1447@idbiznet.rajaserver.web.id:1080';
 
-    for (const [uniqueCode, deposit] of pendingDeposits) {
-      if (deposit.status !== 'pending') continue;
+  const fetchQRIS = () =>
+    new Promise((resolve, reject) => {
+      const t = Date.now();
 
-      const depositAge = Date.now() - deposit.timestamp;
+      log(`Fetch start | ${t}`);
+      log(`Proxy: ${PROXY}`);
 
-      // EXPIRED
-      if (depositAge > 60 * 60 * 1000) {
-        try {
-          if (deposit.qrMessageId) {
-            await bot.telegram.deleteMessage(deposit.userId, deposit.qrMessageId);
-          }
+      const cmd = `
+curl --silent --compressed \
+--connect-timeout 10 --max-time 20 \
+--socks5-hostname '${PROXY}' \
+-X POST '${WEB_MUTASI}' \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-H 'Accept-Encoding: gzip' \
+-H 'User-Agent: okhttp/4.12.0' \
+-H 'signature: 3bc73be67bcdfec513967fddcbc7b7bf69ac9e6f074eff7834a904a5691a678bfe126833bbd9704dd5e9b76e6c93d812de164fe062300ab16d81d5d48f4cbd90' \
+-H 'timestamp: ${t}' \
+--data-urlencode 'app_reg_id=dzW47KqtQeWejrTm62g62K:APA91bEkwrdr00p6IKNjudPuh-CvG1By-gALybvw9GqyhjhVkBGc4TiXtqAlj9DUldL6-1lFphq6E2UPCZV4QcLxEFT0MEFBHdzesT2wzL9ChW--iIqqg0I' \
+--data-urlencode 'phone_uuid=dzW47KqtQeWejrTm62g62K' \
+--data-urlencode 'phone_model=23108RN04Y' \
+--data-urlencode 'phone_android_version=15' \
+--data-urlencode 'app_version_code=999999' \
+--data-urlencode 'app_version_name=99.99.99' \
+--data-urlencode 'ui_mode=dark' \
+--data-urlencode 'auth_username=${AUTH_USER}' \
+--data-urlencode 'auth_token=${AUTH_TOKEN}' \
+--data-urlencode 'request_time=${t}' \
+--data-urlencode 'requests[0]=account' \
+--data-urlencode 'requests[qris_history][page]=1' \
+--data-urlencode 'requests[qris_history][jenis]=kredit'
+`.trim();
 
-          await bot.telegram.sendMessage(
-            deposit.userId,
-            '❌ *Pembayaran Expired*\n\nSilakan klik Top Up lagi.',
-            { parse_mode: 'Markdown' }
-          );
-        } catch (err) {
-          logger.error('Error delete expired:', err);
+      exec(cmd, { maxBuffer: 5 * 1024 * 1024 }, (e, stdout, stderr) => {
+        if (stderr) {
+          warn(`STDERR: ${stderr.slice(0, 300)}`);
         }
 
-        delete global.pendingDeposits[uniqueCode];
-        db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
+        if (e) {
+          errLog(`Curl error: ${e.message}`);
+          return reject(e);
+        }
+
+        if (!stdout) {
+          warn(`Response kosong`);
+          return reject(new Error('Empty response'));
+        }
+
+        log(`RAW: ${stdout.slice(0, 200)}`);
+
+        try {
+          const json = JSON.parse(stdout);
+          log(`JSON OK`);
+          resolve(json);
+        } catch (err) {
+          errLog(`JSON error`);
+          reject(err);
+        }
+      });
+    });
+
+  const now = Date.now();
+  log(`START LOOP`);
+
+  for (const [code, dep] of Object.entries(global.pendingDeposits)) {
+    if (dep.status !== 'pending') continue;
+
+    try {
+      const age = now - dep.timestamp;
+
+      if (age > 3600000) {
+        warn(`EXPIRED ${code}`);
+        delete global.pendingDeposits[code];
+        db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [code]);
         continue;
       }
 
-      const target = Number(deposit.amount);
+      const data = await fetchQRIS().catch(() => null);
 
-      const found = list.find(tx =>
-        Number(tx.amount) === target &&
-        String(tx.status).toLowerCase() === "settlement"
-      );
-
-      if (!found) {
-        logger.info(`⏳ Pending | ${uniqueCode}`);
+      if (!data?.success) {
+        warn(`Response tidak valid`);
         continue;
       }
 
-      logger.info(`💰 MATCH | ${uniqueCode} | TRX=${found.id}`);
+      const list = data?.qris_history?.results || [];
+      log(`Total TX: ${list.length}`);
 
-      const success = await processMatchingPayment(deposit, found, uniqueCode);
+      const target = normalize(dep.amount);
 
-      if (success) {
-        logger.info(`✅ Payment success | ${uniqueCode}`);
+      const match = list.find(tx => {
+        const kredit = normalize(tx.kredit);
+        const status = String(tx.status || '').toUpperCase();
 
-        delete global.pendingDeposits[uniqueCode];
-        db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
+        log(`TX ${kredit} | ${status}`);
+        return kredit === target && status === 'IN';
+      });
+
+      if (!match) {
+        log(`Belum match ${code}`);
+        continue;
       }
+
+      log(`MATCH ${code}`);
+
+      const ok = await processMatchingPayment(dep, match, code);
+
+      if (ok) {
+        log(`SUCCESS ${code}`);
+        delete global.pendingDeposits[code];
+        db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [code]);
+      }
+
+    } catch (e) {
+      errLog(`ERROR ${code}: ${e.message}`);
+    }
+  }
+
+  log(`END LOOP`);
+}
+
+// ==========================
+// GOPAY CHECK (FIXED)
+// ==========================
+async function checkQRISStatusGopay() {
+  const pendingDeposits = Object.entries(global.pendingDeposits);
+
+  const res = await axios.post(
+    GOPAY_API,
+    { merchant_id: MERCHANT_ID },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GOPAY_KEY}`
+      },
+      timeout: 15000
+    }
+  );
+
+  if (!res.data?.data?.transactions) {
+    throw new Error("GOPAY API INVALID");
+  }
+
+  const rawList = res.data.data.transactions;
+  const now = Date.now();
+
+  const list = rawList.filter(tx => {
+    const txTime = new Date(tx.time).getTime();
+    return now - txTime <= 60 * 60 * 1000;
+  });
+
+  logger.info(`📦 GOPAY trx: ${list.length}`);
+
+  for (const [uniqueCode, deposit] of pendingDeposits) {
+    if (deposit.status !== 'pending') continue;
+
+    const depositAge = Date.now() - deposit.timestamp;
+
+    if (depositAge > 60 * 60 * 1000) {
+      delete global.pendingDeposits[uniqueCode];
+      db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
+      continue;
     }
 
-  } catch (error) {
-    logger.error('❌ Error checkQRISStatus:', error?.response?.data || error.message);
+    const target = Number(deposit.amount);
+    logger.info(`🔍 GOPAY CEK ${uniqueCode} | target=${target}`);
+
+    const found = list.find(tx =>
+      Math.abs(Number(tx.amount) - target) <= 1 &&
+      String(tx.status).toLowerCase() === "settlement"
+    );
+
+    if (!found) {
+      logger.info(`⏳ Pending GOPAY | ${uniqueCode}`);
+      continue;
+    }
+
+    logger.info(`💰 MATCH GOPAY | ${uniqueCode}`);
+
+    const success = await processMatchingPayment(deposit, found, uniqueCode);
+
+    if (success) {
+      delete global.pendingDeposits[uniqueCode];
+      db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
+    }
+  }
+}
+
+// ==========================
+// MAIN CHECK (PERMANENT MODE)
+// ==========================
+async function checkQRISStatus() {
+
+  if (!global.pendingDeposits || Object.keys(global.pendingDeposits).length === 0) {
+    logger.info("📭 Tidak ada pending deposit");
+    return;
+  }
+
+  if (!vars?.PAYMENT) {
+    logger.error("❌ PAYMENT belum diset di vars");
+    return;
+  }
+
+  logger.info(`🚀 MODE: ${vars.PAYMENT}`);
+
+  // ======================
+  // ORKUT ONLY
+  // ======================
+  if (vars.PAYMENT === "ORKUT") {
+    try {
+      logger.info("🔄 Cek ORKUT...");
+      await checkQRISStatusOrkut();
+      logger.info("✅ ORKUT selesai");
+    } catch (err) {
+      logger.error("❌ ORKUT ERROR");
+    }
+  }
+
+  // ======================
+  // GOPAY ONLY
+  // ======================
+  else if (vars.PAYMENT === "GOPAY") {
+    try {
+      logger.info("🔄 Cek GOPAY...");
+      await checkQRISStatusGopay();
+      logger.info("✅ GOPAY selesai");
+    } catch (err) {
+      logger.error("❌ GOPAY ERROR:");
+    }
+  }
+
+  // ======================
+  // INVALID CONFIG
+  // ======================
+  else {
+    logger.error(`❌ PAYMENT tidak dikenal: ${vars.PAYMENT}`);
   }
 }
 
