@@ -3970,12 +3970,30 @@ function generateRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// ============================
+// EXEC PROMISE
+// ============================
+const execP = (cmd, opts = {}) =>
+  new Promise((resolve, reject) => {
+    exec(cmd, opts, (err, stdout, stderr) => {
+      if (err) {
+        err.stderr = stderr;
+        err.stdout = stdout;
+        return reject(err);
+      }
+      resolve(stdout);
+    });
+  });
+
+// ============================
+// PROCESS DEPOSIT
+// ============================
 async function processDeposit(ctx, amount) {
   const currentTime = Date.now();
 
   if (currentTime - lastRequestTime < requestInterval) {
     await ctx.editMessageText(
-      '⚠️ *Terlalu banyak permintaan. Silakan tunggu sebentar sebelum mencoba lagi.*',
+      '⚠️ *Terlalu banyak request, tunggu dulu ya.*',
       { parse_mode: 'Markdown' }
     );
     return;
@@ -3986,124 +4004,196 @@ async function processDeposit(ctx, amount) {
   const userId = ctx.from.id;
   const uniqueCode = `user-${userId}-${Date.now()}`;
 
-  const finalAmount = Number(amount) + generateRandomNumber(1, 300);
-  const adminFee = finalAmount - Number(amount);
+  let finalAmount = Number(amount);
+  let adminFee = 0;
 
   try {
-    const urlQr = DATA_QRIS;
-    const auth_apikey = APIKEY;
+    let qrImageUrl, transactionId = null;
 
-    const { exec } = require('child_process');
+    // ======================
+    // GOPAY (NO FEE)
+    // ======================
+    if (vars.PAYMENT === "GOPAY") {
 
-    const execP = (cmd, opts = {}) =>
-      new Promise((resolve, reject) => {
-        exec(cmd, opts, (err, stdout, stderr) => {
-          if (err) {
-            err.stderr = stderr;
-            err.stdout = stdout;
-            return reject(err);
-          }
-          resolve(stdout);
-        });
-      });
+      finalAmount = Number(amount); // 🔥 TANPA TAMBAHAN
+      adminFee = 0;
 
-    // ===== CREATE QRIS (CURL -4) =====
-if (vars.PAYMENT === "GOPAY") {
-  createUrl = "https://api.rajaserver.web.id/gopaymerchat/createpayment";
-  apiKey = vars.AUTH_PAYMET_GETWAY;
-  codeQr = vars.DATA_QRIS;
-}
+      const res = await axios.post(
+        "https://api-gopay.sawargipay.cloud/qris/generate",
+        { amount: finalAmount },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${GOPAY_KEY}`
+          },
+          timeout: 15000
+        }
+      );
 
-else if (vars.PAYMENT === "ORKUT") {
-  createUrl = "https://api.rajaserver.web.id/orderkuota/createpayment"; 
-  apiKey = vars.AUTH_PAYMET_GETWAY; 
-  codeQr = vars.DATA_QRIS_ORKUT;
-}
-    const createCmd =
-      `curl -4 -sS -L --get "${createUrl}" ` +
-      `--data-urlencode "apikey=${apiKey}" ` +
-      `--data-urlencode "amount=${finalAmount}" ` +
-      `--data-urlencode "codeqr=${codeQr}"`;
+      if (!res.data?.success) {
+        throw new Error("Gagal create QRIS GOPAY");
+      }
 
-    const out = await execP(createCmd, { maxBuffer: 5 * 1024 * 1024 });
+      const data = res.data.data;
 
-    let get;
-    try {
-      get = JSON.parse(String(out));
-    } catch (e) {
-      throw new Error("Createpayment bukan JSON: " + String(out).slice(0, 300));
+      transactionId = data.transaction_id;
+      qrImageUrl = data.qr_url;
+
+      if (!qrImageUrl) {
+        throw new Error("QR URL kosong");
+      }
     }
 
-    if (get.status !== 'success') {
-      throw new Error('Gagal membuat QRIS: ' + JSON.stringify(get));
+    // ======================
+    // ORKUT (PAKAI FEE RANDOM)
+    // ======================
+    else if (vars.PAYMENT === "ORKUT") {
+
+      finalAmount = Number(amount) + generateRandomNumber(1, 300);
+      adminFee = finalAmount - Number(amount);
+
+      const createUrl = "https://api.rajaserver.web.id/orderkuota/createpayment";
+      const apiKey = vars.AUTH_PAYMET_GETWAY;
+      const codeQr = vars.DATA_QRIS_ORKUT;
+
+      const createCmd =
+        `curl -4 -sS -L --get "${createUrl}" ` +
+        `--data-urlencode "apikey=${apiKey}" ` +
+        `--data-urlencode "amount=${finalAmount}" ` +
+        `--data-urlencode "codeqr=${codeQr}"`;
+
+      const out = await execP(createCmd, { maxBuffer: 5 * 1024 * 1024 });
+
+      const get = JSON.parse(String(out));
+
+      if (get.status !== 'success') {
+        throw new Error("Gagal create QRIS ORKUT");
+      }
+
+      qrImageUrl = get.result?.imageqris?.url;
+
+      if (!qrImageUrl) {
+        throw new Error("QR ORKUT tidak valid");
+      }
     }
 
-    const qrImageUrl = get.result?.imageqris?.url;
-    if (!qrImageUrl || String(qrImageUrl).includes('undefined')) {
-      throw new Error('URL QRIS tidak valid: ' + String(qrImageUrl));
+    else {
+      throw new Error("PAYMENT tidak valid");
     }
 
-// ✅ FIX: bikin URL aman (spasi jadi %20 biar full klik di Telegram)
-const safeQrUrl = encodeURI(String(qrImageUrl).trim());
+    // ======================
+    // FORMAT PESAN
+    // ======================
+    const safeQrUrl = encodeURI(String(qrImageUrl).trim());
 
-const caption =
-  `📝 *Detail Pembayaran:*\n\n` +
-  `💰 Jumlah: Rp ${finalAmount}\n` +
-  `- Nominal Top Up: Rp ${amount}\n` +
-  `- Admin Fee : Rp ${adminFee}\n` +
-  `⚠️ *Penting:* Mohon transfer sesuai nominal\n` +
-  `⏱️ Waktu: 60 menit\n\n` +
-  `⚠️ *Catatan:*\n` +
-  `- Pembayaran akan otomatis terverifikasi\n` +
-  `- Jika pembayaran berhasil, saldo akan otomatis ditambahkan\n\n` +
-  `🔗 *Link QR:* [Buka QRIS](${safeQrUrl})\n` +
-  `atau scan QR di bawah ini:\n`;
+    const caption =
+      `📝 *Detail Pembayaran*\n\n` +
+      `💰 Total: Rp ${finalAmount}\n` +
+      `- Topup: Rp ${amount}\n` +
+      (adminFee > 0 ? `- Admin: Rp ${adminFee}\n` : ``) +
+      `\n⏱️ Expired: 15 menit\n` +
+      `⚠️ Transfer harus sama persis!\n\n` +
+      `🔗 [Klik QRIS](${safeQrUrl})\n`;
 
-const qrMessage = await ctx.reply(caption, {
-  parse_mode: 'Markdown',
-  reply_markup: {
-    inline_keyboard: [
-      [{ text: '❌ Batal', callback_data: `batal_topup_${uniqueCode}` }]
-    ]
-  }
-});
+    const qrMessage = await ctx.reply(caption, {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '❌ Batal', callback_data: `batal_topup_${uniqueCode}` }]
+        ]
+      }
+    });
 
-    try {
-      await ctx.deleteMessage();
-    } catch (e) {
-      logger.error('Gagal menghapus pesan input nominal:', e.message);
-    }
+    try { await ctx.deleteMessage(); } catch {}
 
+    // ======================
+    // SIMPAN
+    // ======================
     global.pendingDeposits[uniqueCode] = {
       amount: finalAmount,
       originalAmount: amount,
       userId,
       timestamp: Date.now(),
       status: 'pending',
-      qrMessageId: qrMessage?.message_id
+      qrMessageId: qrMessage?.message_id,
+      transactionId
     };
 
     db.run(
-      `INSERT INTO pending_deposits (unique_code, user_id, amount, original_amount, timestamp, status, qr_message_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [uniqueCode, userId, finalAmount, amount, Date.now(), 'pending', qrMessage?.message_id],
-      (err) => {
-        if (err) logger.error('Gagal insert pending_deposits:', err.message);
-      }
+      `INSERT INTO pending_deposits 
+      (unique_code, user_id, amount, original_amount, timestamp, status, qr_message_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [uniqueCode, userId, finalAmount, amount, Date.now(), 'pending', qrMessage?.message_id]
     );
 
     delete global.depositState[userId];
-  } catch (error) {
-    logger.error('❌ Kesalahan saat memproses deposit:', {
-      message: error?.message,
-      code: error?.code,
-      stderr: error?.stderr,
-      stack: error?.stack
-    });
 
-    await ctx.reply('❌ Gagal memproses deposit. Coba lagi beberapa saat.', {
+  } catch (error) {
+    logger.error("❌ Deposit error:", error.message);
+
+    await ctx.reply('❌ Gagal membuat QRIS, coba lagi nanti.', {
       parse_mode: 'Markdown'
     });
+  }
+}
+
+// ============================
+// CHECK STATUS GOPAY (NEW API)
+// ============================
+async function checkQRISStatusGopay() {
+  const pendingDeposits = Object.entries(global.pendingDeposits);
+
+  for (const [uniqueCode, deposit] of pendingDeposits) {
+    if (deposit.status !== 'pending') continue;
+    if (!deposit.transactionId) continue;
+
+    const age = Date.now() - deposit.timestamp;
+
+    if (age > 15 * 60 * 1000) {
+      delete global.pendingDeposits[uniqueCode];
+      db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
+      continue;
+    }
+
+    try {
+      const res = await axios.post(
+        "https://api-gopay.sawargipay.cloud/qris/status",
+        { transaction_id: deposit.transactionId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${GOPAY_KEY}`
+          },
+          timeout: 15000
+        }
+      );
+
+      const data = res.data?.data;
+      if (!data) continue;
+
+      const status = data.transaction_status;
+
+      logger.info(`🔍 ${uniqueCode} | ${status}`);
+
+      if (status !== "settlement") continue;
+
+      logger.info(`💰 PEMBAYARAN MASUK ${uniqueCode}`);
+
+      const success = await processMatchingPayment(
+        deposit,
+        data,
+        uniqueCode
+      );
+
+      if (success) {
+        delete global.pendingDeposits[uniqueCode];
+        db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
+        
+      }
+
+    } catch (err) {
+      logger.error(`❌ GOPAY ERROR ${uniqueCode}: ${err.message}`);
+    }
   }
 }
 
@@ -4222,7 +4312,16 @@ curl --silent --compressed \
 
       log(`MATCH ${code}`);
 
-      const ok = await processMatchingPayment(dep, match, code);
+      await successDeposit(
+  dep.userId,
+  dep.originalAmount,
+  match.issuer_reff || match.reff || 'ORKUT',
+  'QRIS ORKUT',
+  dep.qrMessageId
+);
+
+delete global.pendingDeposits[code];
+await dbRun('DELETE FROM pending_deposits WHERE unique_code = ?', [code]);
 
       if (ok) {
         log(`SUCCESS ${code}`);
@@ -4238,123 +4337,23 @@ curl --silent --compressed \
   log(`END LOOP`);
 }
 
-// ==========================
-// GOPAY CHECK (FIXED)
-// ==========================
-async function checkQRISStatusGopay() {
-  const pendingDeposits = Object.entries(global.pendingDeposits);
-
-  const res = await axios.post(
-    GOPAY_API,
-    { merchant_id: MERCHANT_ID },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${GOPAY_KEY}`
-      },
-      timeout: 15000
-    }
-  );
-
-  if (!res.data?.data?.transactions) {
-    throw new Error("GOPAY API INVALID");
-  }
-
-  const rawList = res.data.data.transactions;
-  const now = Date.now();
-
-  const list = rawList.filter(tx => {
-    const txTime = new Date(tx.time).getTime();
-    return now - txTime <= 60 * 60 * 1000;
-  });
-
-  logger.info(`📦 GOPAY trx: ${list.length}`);
-
-  for (const [uniqueCode, deposit] of pendingDeposits) {
-    if (deposit.status !== 'pending') continue;
-
-    const depositAge = Date.now() - deposit.timestamp;
-
-    if (depositAge > 60 * 60 * 1000) {
-      delete global.pendingDeposits[uniqueCode];
-      db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
-      continue;
-    }
-
-    const target = Number(deposit.amount);
-    logger.info(`🔍 GOPAY CEK ${uniqueCode} | target=${target}`);
-
-    const found = list.find(tx =>
-      Math.abs(Number(tx.amount) - target) <= 1 &&
-      String(tx.status).toLowerCase() === "settlement"
-    );
-
-    if (!found) {
-      logger.info(`⏳ Pending GOPAY | ${uniqueCode}`);
-      continue;
-    }
-
-    logger.info(`💰 MATCH GOPAY | ${uniqueCode}`);
-
-    const success = await processMatchingPayment(deposit, found, uniqueCode);
-
-    if (success) {
-      delete global.pendingDeposits[uniqueCode];
-      db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
-    }
-  }
-}
-
-// ==========================
-// MAIN CHECK (PERMANENT MODE)
-// ==========================
+// ============================
+// MAIN CHECK
+// ============================
 async function checkQRISStatus() {
+  if (!global.pendingDeposits || Object.keys(global.pendingDeposits).length === 0) return;
 
-  if (!global.pendingDeposits || Object.keys(global.pendingDeposits).length === 0) {
-    logger.info("📭 Tidak ada pending deposit");
-    return;
-  }
-
-  if (!vars?.PAYMENT) {
-    logger.error("❌ PAYMENT belum diset di vars");
-    return;
-  }
-
-  logger.info(`🚀 MODE: ${vars.PAYMENT}`);
-
-  // ======================
-  // ORKUT ONLY
-  // ======================
-  if (vars.PAYMENT === "ORKUT") {
-    try {
-      logger.info("🔄 Cek ORKUT...");
-      await checkQRISStatusOrkut();
-      logger.info("✅ ORKUT selesai");
-    } catch (err) {
-      logger.error("❌ ORKUT ERROR");
-    }
-  }
-
-  // ======================
-  // GOPAY ONLY
-  // ======================
-  else if (vars.PAYMENT === "GOPAY") {
-    try {
-      logger.info("🔄 Cek GOPAY...");
-      await checkQRISStatusGopay();
-      logger.info("✅ GOPAY selesai");
-    } catch (err) {
-      logger.error("❌ GOPAY ERROR:");
-    }
-  }
-
-  // ======================
-  // INVALID CONFIG
-  // ======================
-  else {
-    logger.error(`❌ PAYMENT tidak dikenal: ${vars.PAYMENT}`);
+  if (vars.PAYMENT === "GOPAY") {
+    await checkQRISStatusGopay();
+  } else {
+    await checkQRISStatusOrkut();
   }
 }
+
+// ============================
+// AUTO LOOP
+// ============================
+setInterval(checkQRISStatus, 5000);
 
 function keyboard_abc() {
   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
@@ -4567,8 +4566,6 @@ async function processMatchingPayment(deposit, matchingTransaction, uniqueCode) 
     });
   });
 }
-
-setInterval(checkQRISStatus, 10000);
 
 async function recordAccountTransaction(userId, type) {
   return new Promise((resolve, reject) => {
