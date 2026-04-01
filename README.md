@@ -5,29 +5,53 @@ sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.di
 ```
 ## UPDATE
 ```bash
-curl --connect-timeout 1 --max-time 3SL https://raw.githubusercontent.com/arivpnstores/BotVPN/main/update.sh -o update.sh && chmod +x update.sh && bash update.sh
+curl --connect-timeout 1 --max-time 3 -sL https://raw.githubusercontent.com/arivpnstores/BotVPN/main/update.sh -o update.sh && chmod +x update.sh && bash update.sh
 ```
 <img src="./ss.png" alt="image" width="500"/>
 
+
 ## DUAL METHODE AUTO PAYMET
--
-## CEK PEMBAYARAN GOPAY
-https://gopay.autoftbot.com/
-SILAHKAN DONASI KE PADA ADMIN AUTOFT JIKA INI BERMANFAT
+
+**1. GopayMerchat (Unofficial)**
+- CEK PEMBAYARAN GOPAY
+- Pembelian key: https://t.me/AutoGopayBot
+- Web panel: https://gopay.sawargipay.cloud
+- Harga Rp1.000 / Hari (bisa tanpa fee di qris)
 ```bash
-AMBIL MERCHANT_ID, GOPAY_KEY, QR STRING 
+AMBIL GOPAY_KEY
 ```
--
-## DATA QRIS ORDER KUOTA
+
+**2. Orderkuota (Unofficial)**
+
+- DATA QRIS ORDER KUOTA AMBIL DI SINI
 https://scanqr.org/
 
-## CEK PEMBAYARAN ORKUT 
-TUTORIAL AMBIL API CEK PEMBAYARAN VIA VIDIO : https://drive.google.com/file/d/1ugR_N5gEtcLx8TDsf7ecTFqYY3zrlHn-/view?usp=drivesdk
+**Login Step 1**
 ```bash
-ambil username, auth_token, web_mutasi 
+curl -X POST "https://orkut.rajaserver.web.id/api/orkut/login" -d "username=08123456789&password=password123"
 ```
--
+
+**Login Step 2**
+```bash
+curl -X POST "https://orkut.rajaserver.web.id/api/orkut/verify-otp" -d "username=08123456789&otp=123456"
+```
+
+**Cek Mutasi**
+```bash
+curl -X POST "https://orkut.rajaserver.web.id/api/orkut/qris-history" -d "username=08123456789&token=merchant_id:token_string&jenis=masuk"
+```
+
+**Tarik Saldo**
+```bash
+curl -X POST "https://orkut.rajaserver.web.id/api/orkut/qris-withdraw" -d "username=08123456789&token=merchant_id:token_string&amount=100000"
+```
+
+---
+
 ## TAMPILAN SC BotVPN POTATO 
 <img src="./ss2.png" alt="image" width="300"/>
 
 Owner : https://t.me/ARI_VPN_STORE
+
+DONASI SCAN QIRS : 
+<img src="https://rajaserver.web.id/qris.jpg" alt="image" width="300"/>

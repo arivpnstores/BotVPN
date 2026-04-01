@@ -1740,7 +1740,7 @@ bot.action('renew_ssh', async (ctx) => {
 async function startSelectServer(ctx, action, type, page = 0) {
   try {
     const isR = await isUserReseller(ctx.from.id);
-    const query = 'SELECT * FROM Server ORDER BY nama_server ASC';
+    const query = 'SELECT * FROM Server'; // urut di JS, bukan SQL
 
     db.all(query, [], (err, servers) => {
       if (err) {
@@ -1749,28 +1749,33 @@ async function startSelectServer(ctx, action, type, page = 0) {
       }
 
       // ==== FILTER RESSELLER-ONLY ====
-const filteredServers = servers.filter(server => {
-  const isResellerOnly = Number(server.is_reseller_only) === 1;
+      let filteredServers = servers.filter(server => {
+        const isResellerOnly = Number(server.is_reseller_only) === 1;
 
-  // Jika server hanya untuk reseller
-  if (isResellerOnly && !isR) {
-    logger.info(`Menyembunyikan server ${server.nama_server} untuk user biasa ${ctx.from.id}`);
-    return false;
-  }
+        if (isResellerOnly && !isR) {
+          logger.info(`Menyembunyikan server ${server.nama_server} untuk user biasa ${ctx.from.id}`);
+          return false;
+        }
 
-  // Jika server publik dan user adalah reseller (optional: sembunyikan server publik untuk reseller)
-  if (!isResellerOnly && isR) {
-    logger.info(`Menyembunyikan server publik ${server.nama_server} untuk reseller ${ctx.from.id}`);
-    return false;
-  }
+        if (!isResellerOnly && isR) {
+          logger.info(`Menyembunyikan server publik ${server.nama_server} untuk reseller ${ctx.from.id}`);
+          return false;
+        }
 
-  return true;
-});
+        return true;
+      });
 
+      // ==== SORT SERVER TERSEDIA DI DEPAN, PENUH DI BELAKANG ====
+      filteredServers.sort((a, b) => {
+        const aFull = a.total_create_akun >= a.batas_create_akun ? 1 : 0;
+        const bFull = b.total_create_akun >= b.batas_create_akun ? 1 : 0;
+        if (aFull !== bFull) return aFull - bFull; // server penuh terakhir
+        return a.nama_server.localeCompare(b.nama_server); // urut alfabet kalau status sama
+      });
 
       logger.info(`User ${ctx.from.id} melihat ${filteredServers.length} server dari ${servers.length} total`);
 
-      // ==== Pagination & render ====
+      // ==== Pagination ====
       const serversPerPage = 10;
       const totalPages = Math.ceil(filteredServers.length / serversPerPage);
       const currentPage = Math.min(Math.max(page, 0), totalPages - 1);
@@ -1778,16 +1783,33 @@ const filteredServers = servers.filter(server => {
       const end = start + serversPerPage;
       const currentServers = filteredServers.slice(start, end);
 
+      // ==== Keyboard ====
       const keyboard = [];
       for (let i = 0; i < currentServers.length; i += 2) {
         const row = [];
-        row.push({ text: currentServers[i].nama_server, callback_data: `${action}_username_${type}_${currentServers[i].id}` });
-        if (currentServers[i + 1]) {
-          row.push({ text: currentServers[i + 1].nama_server, callback_data: `${action}_username_${type}_${currentServers[i + 1].id}` });
+        const server1 = currentServers[i];
+        const server2 = currentServers[i + 1];
+
+        row.push({
+          text: server1.nama_server + (server1.total_create_akun >= server1.batas_create_akun ? " ⚠️" : ""),
+          callback_data: server1.total_create_akun >= server1.batas_create_akun
+            ? "disabled"
+            : `${action}_username_${type}_${server1.id}`
+        });
+
+        if (server2) {
+          row.push({
+            text: server2.nama_server + (server2.total_create_akun >= server2.batas_create_akun ? " ⚠️" : ""),
+            callback_data: server2.total_create_akun >= server2.batas_create_akun
+              ? "disabled"
+              : `${action}_username_${type}_${server2.id}`
+          });
         }
+
         keyboard.push(row);
       }
 
+      // Navigation
       const navButtons = [];
       if (totalPages > 1) {
         if (currentPage > 0) navButtons.push({ text: '⬅️ Back', callback_data: `navigate_${action}_${type}_${currentPage - 1}` });
@@ -1796,45 +1818,30 @@ const filteredServers = servers.filter(server => {
       if (navButtons.length) keyboard.push(navButtons);
       keyboard.push([{ text: '🔙 Kembali ke Menu Utama', callback_data: 'send_main_menu' }]);
 
-/*
+      // ==== Server List Text ====
       const serverList = currentServers.map(server => {
         const hargaPer30Hari = server.harga * 30;
         const isFull = server.total_create_akun >= server.batas_create_akun;
+
+        // QUOTA
+        const rawQuota = server.quota?.toString().trim();
+        const showQuota = !rawQuota || rawQuota === "0" || rawQuota === ")" ? "Unlimited" : `${rawQuota}GB`;
+
+        // IP LIMIT
+        const rawIP = parseInt(server.iplimit, 10) || 0;
+        const showIP = rawIP === 0 ? 5 : rawIP;
+
         return `🌐 *${server.nama_server}*\n` +
                `💰 Harga per hari: Rp${server.harga}\n` +
                `📅 Harga per 30 hari: Rp${hargaPer30Hari}\n` +
-               `📊 Quota: ${server.quota}GB\n` +
-               `🔢 Limit IP: ${server.iplimit} IP\n` +
-               (isFull ? `⚠️ *Server Penuh*` : `👥 Total Create Akun: ${server.total_create_akun}/${server.batas_create_akun}`);
+               `📊 Quota: ${showQuota}\n` +
+               `🔢 Limit IP: ${showIP} IP\n` +
+               (isFull
+                 ? `⚠️ *Server Penuh*`
+                 : `👥 Total Create Akun: ${server.total_create_akun}/${server.batas_create_akun}`);
       }).join('\n\n');
-*/
 
-const serverList = currentServers.map(server => {
-  const hargaPer30Hari = server.harga * 30;
-  const isFull = server.total_create_akun >= server.batas_create_akun;
-
-  // QUOTA: 0 / kosong / ")" => Unlimited
-  const rawQuota = server.quota?.toString().trim();
-  const showQuota =
-    !rawQuota || rawQuota === "0" || rawQuota === ")"
-      ? "Unlimited"
-      : `${rawQuota}GB`;
-
-  // IP LIMIT: 0 / kosong => 5
-  const rawIP = parseInt(server.iplimit, 10) || 0;
-  const showIP = rawIP === 0 ? 5 : rawIP;
-
-  return `🌐 *${server.nama_server}*\n` +
-         `💰 Harga per hari: Rp${server.harga}\n` +
-         `📅 Harga per 30 hari: Rp${hargaPer30Hari}\n` +
-         `📊 Quota: ${showQuota}\n` +
-         `🔢 Limit IP: ${showIP} IP\n` +
-         (isFull
-           ? `⚠️ *Server Penuh*`
-           : `👥 Total Create Akun: ${server.total_create_akun}/${server.batas_create_akun}`);
-}).join('\n\n');
-
-
+      // ==== Send / Edit Message ====
       if (ctx.updateType === 'callback_query') {
         ctx.editMessageText(`📋 *List Server (Halaman ${currentPage + 1} dari ${totalPages})*\n\n${serverList}`, {
           reply_markup: { inline_keyboard: keyboard },
