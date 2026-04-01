@@ -25,7 +25,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       const KUOTA = "0"; // jika perlu di-hardcode, bisa diubah jadi parameter juga
       const LIMIT_IP = iplimit;
 
-  const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
+  const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
@@ -36,7 +36,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   if (err) {
     console.error("❌ Curl error:", err.message);
     if (stderr) console.error("🪵 stderr:", stderr);
-    return resolve("❌ Gagal menghubungi server (curl error).");
+    return resolve("❌ Respon Server Error:", stderr);
   }
 
   // 2) Output kosong / whitespace
@@ -88,12 +88,12 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 *🔐 SSH Premium Details*
 ────────────────────────
 📡 *SSH WS*    : \`${s.hostname}:80@${s.username}:${s.password}\`
-🔒 *SSH SSL*   : \`${s.hostname}:443@${s.username}:${s.password}\`
-📶 *SSH UDP*   : \`${s.hostname}:1-65535@${s.username}:${s.password}\`
+🔒 *SSH SSL*   : \`ssl-${s.hostname}:443@${s.username}:${s.password}\`
+📶 *SSH UDP*   : \`udp-${s.hostname}:1-65535@${s.username}:${s.password}\`
 🌐 *SSH SLOWDNS* : \`ns-${s.hostname}:5300@${s.username}:${s.password}\`
 ────────────────────────
 *🔑 Account ZIVPN UDP*
-📡 *DOMAIN*    : \`${s.hostname}\`
+📡 *DOMAIN*    : \`udp-${s.hostname}\`
 🔑 *Password*     : \`${s.username}\`
 ────────────────────────
 🌍 *Host*         : \`${s.hostname}\`
@@ -187,7 +187,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       const KUOTA = quota;
       const LIMIT_IP = limitip;
 
-  const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
+  const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
@@ -198,7 +198,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   if (err) {
     console.error("❌ Curl error:", err.message);
     if (stderr) console.error("🪵 stderr:", stderr);
-    return resolve("❌ Gagal menghubungi server (curl error).");
+    return resolve("❌ Respon Server Error:", stderr);
   }
 
   // 2) Output kosong / whitespace
@@ -250,7 +250,8 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 🔐 *Akun VMess Premium*
 ──────────────
 👤 *Username*     : \`${s.username}\`
-🌍 *Host*         : \`${s.hostname}\`
+🌍 *Host Default* : \`${s.hostname}\`
+🌍 *Host SSL*     : \`ssl-${s.hostname}\`
 🏢 *ISP*          : \`${s.ISP}\`
 🏙️ *City*         : \`${s.CITY}\`
 🛡 *UUID*         : \`${s.uuid}\`
@@ -329,7 +330,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       const KUOTA = quota;
       const LIMIT_IP = limitip;
 
-  const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
+  const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
@@ -340,7 +341,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   if (err) {
     console.error("❌ Curl error:", err.message);
     if (stderr) console.error("🪵 stderr:", stderr);
-    return resolve("❌ Gagal menghubungi server (curl error).");
+    return resolve("❌ Respon Server Error:", stderr);
   }
 
   // 2) Output kosong / whitespace
@@ -392,7 +393,8 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 🔐 *Akun VLESS Premium*
 ──────────────
 👤 *Username*     : \`${s.username}\`
-🌍 *Host*         : \`${s.hostname}\`
+🌍 *Host Default* : \`${s.hostname}\`
+🌍 *Host SSL*     : \`ssl-${s.hostname}\`
 🏢 *ISP*          : \`${s.ISP}\`
 🏙️ *City*         : \`${s.CITY}\`
 🛡 *UUID*         : \`${s.uuid}\`
@@ -469,7 +471,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
       const KUOTA = quota;
       const LIMIT_IP = limitip;
 
-  const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 --fail -X POST "${web_URL}" \
+  const curlCommand = `curl -sS --connect-timeout 1 --max-time 30 -X POST "${web_URL}" \
 -H "Authorization: ${AUTH_TOKEN}" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
@@ -480,7 +482,7 @@ if (!/^[a-z0-9-]+$/.test(username)) {
   if (err) {
     console.error("❌ Curl error:", err.message);
     if (stderr) console.error("🪵 stderr:", stderr);
-    return resolve("❌ Gagal menghubungi server (curl error).");
+    return resolve("❌ Respon Server Error:", stderr);
   }
 
   // 2) Output kosong / whitespace
@@ -532,7 +534,8 @@ if (!/^[a-z0-9-]+$/.test(username)) {
 🔐 *Akun TROJAN Premium*
 ──────────────
 👤 *Username*     : \`${s.username}\`
-🌍 *Host*         : \`${s.hostname}\`
+🌍 *Host Default* : \`${s.hostname}\`
+🌍 *Host SSL*     : \`ssl-${s.hostname}\`
 🏢 *ISP*          : \`${s.ISP}\`
 🏙️ *City*         : \`${s.CITY}\`
 🔑 *Key*          : \`${s.uuid}\`
