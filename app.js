@@ -140,7 +140,7 @@ async function saveTrialAccess(userId) {
 
 
 const fs = require('fs');
-const vars = JSON.parse(fs.readFileSync('./.vars.json', 'utf8'));
+const vars = JSON.parse(fs.readFileSync(path.join(__dirname, '.vars.json'), 'utf8'));
 
 const BOT_TOKEN = vars.BOT_TOKEN;
 const port = vars.PORT || 6969;
@@ -170,11 +170,12 @@ logger.info('Bot initialized');
   }
 })();
 */
-const db = new sqlite3.Database('./sellvpn.db', (err) => {
+const dbPath = path.join(__dirname, 'sellvpn.db');
+const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     logger.error('Kesalahan koneksi SQLite3:', err.message);
   } else {
-    logger.info('Terhubung ke SQLite3');
+    logger.info(`Terhubung ke SQLite3: ${dbPath}`);
   }
 });
 
@@ -185,10 +186,24 @@ db.run(`CREATE TABLE IF NOT EXISTS pending_deposits (
   original_amount INTEGER,
   timestamp INTEGER,
   status TEXT,
-  qr_message_id INTEGER
+  qr_message_id INTEGER,
+  transaction_id TEXT,
+  chat_id INTEGER
 )`, (err) => {
   if (err) {
     logger.error('Kesalahan membuat tabel pending_deposits:', err.message);
+  }
+});
+
+db.run(`ALTER TABLE pending_deposits ADD COLUMN transaction_id TEXT`, (err) => {
+  if (err && !err.message.includes('duplicate column')) {
+    logger.error('Gagal menambahkan kolom transaction_id di pending_deposits:', err.message);
+  }
+});
+
+db.run(`ALTER TABLE pending_deposits ADD COLUMN chat_id INTEGER`, (err) => {
+  if (err && !err.message.includes('duplicate column')) {
+    logger.error('Gagal menambahkan kolom chat_id di pending_deposits:', err.message);
   }
 });
 
@@ -293,6 +308,28 @@ db.run(`CREATE TABLE IF NOT EXISTS transactions (
 
 const userState = {};
 logger.info('User state initialized');
+
+function dbRunAsync(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function(err) {
+      if (err) return reject(err);
+      resolve(this);
+    });
+  });
+}
+
+function dbGetAsync(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if (err) return reject(err);
+      resolve(row);
+    });
+  });
+}
+
+async function ensureUserExists(userId) {
+  await dbRunAsync('INSERT OR IGNORE INTO users (user_id) VALUES (?)', [userId]);
+}
 
 bot.command(['start', 'menu'], async (ctx) => {
   logger.info('Start or Menu command received');
@@ -1770,7 +1807,7 @@ async function startSelectServer(ctx, action, type, page = 0) {
         const aFull = a.total_create_akun >= a.batas_create_akun ? 1 : 0;
         const bFull = b.total_create_akun >= b.batas_create_akun ? 1 : 0;
         if (aFull !== bFull) return aFull - bFull; // server penuh terakhir
-        return a.nama_server.localeCompare(b.nama_server); // urut alfabet kalau status sama
+        return b.nama_server.localeCompare(a.nama_server); // Z KE A
       });
 
       logger.info(`User ${ctx.from.id} melihat ${filteredServers.length} server dari ${servers.length} total`);
@@ -3961,7 +3998,9 @@ db.all('SELECT * FROM pending_deposits WHERE status = "pending"', [], (err, rows
       userId: row.user_id,
       timestamp: row.timestamp,
       status: row.status,
-      qrMessageId: row.qr_message_id
+      qrMessageId: row.qr_message_id,
+      transactionId: row.transaction_id,
+      chatId: row.chat_id
     };
   });
   logger.info('Pending deposit loaded:', Object.keys(global.pendingDeposits).length);
@@ -4021,7 +4060,7 @@ async function processDeposit(ctx, amount) {
       adminFee = 0;
 
       const res = await axios.post(
-        "https://api-gopay.sawargipay.cloud/qris/generate",
+        "https://v1-gateway.autogopay.site/qris/generate",
         { amount: finalAmount },
         {
           headers: {
@@ -4133,7 +4172,8 @@ async function processDeposit(ctx, amount) {
       timestamp: Date.now(),
       status: 'pending',
       qrMessageId: qrMessage?.message_id,
-      transactionId
+      transactionId,
+      chatId: qrMessage?.chat?.id || ctx.chat?.id || userId
     };
 
     // ======================
@@ -4141,8 +4181,8 @@ async function processDeposit(ctx, amount) {
     // ======================
     db.run(
       `INSERT INTO pending_deposits 
-      (unique_code, user_id, amount, original_amount, timestamp, status, qr_message_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      (unique_code, user_id, amount, original_amount, timestamp, status, qr_message_id, transaction_id, chat_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         uniqueCode,
         userId,
@@ -4150,7 +4190,9 @@ async function processDeposit(ctx, amount) {
         Number(amount),
         Date.now(),
         'pending',
-        qrMessage?.message_id
+        qrMessage?.message_id,
+        transactionId,
+        qrMessage?.chat?.id || ctx.chat?.id || userId
       ]
     );
 
@@ -4193,7 +4235,7 @@ async function checkQRISStatus() {
       if (vars.PAYMENT === "GOPAY") {
         // Cek status via API GoPay
         const res = await axios.post(
-          "https://api-gopay.sawargipay.cloud/qris/status",
+          "https://v1-gateway.autogopay.site/qris/status",
           { transaction_id: deposit.transactionId },
           {
             headers: {
@@ -4212,7 +4254,7 @@ async function checkQRISStatus() {
         if (status !== "settlement") continue;
 
         logger.info(`💰 PEMBAYARAN MASUK ${uniqueCode}`);
-        const success = await processMatchingPayment(deposit, data, uniqueCode);
+        const success = await processMatchingPaymentAtomic(deposit, data, uniqueCode);
 
         if (success) {
           delete global.pendingDeposits[uniqueCode];
@@ -4260,7 +4302,7 @@ async function checkQRISStatus() {
         }
 
         logger.info(`[QRIS] MATCH ${uniqueCode}`);
-        const success = await processMatchingPayment(deposit, match, uniqueCode);
+        const success = await processMatchingPaymentAtomic(deposit, match, uniqueCode);
 
         if (success) {
           logger.info(`[QRIS] SUCCESS ${uniqueCode}`);
@@ -4366,6 +4408,127 @@ async function sendPaymentSuccessNotification(userId, deposit, currentBalance) {
   } catch (error) {
     logger.error('Error sending payment notification:', error);
     return false;
+  }
+}
+
+async function processMatchingPaymentAtomic(deposit, matchingTransaction, uniqueCode) {
+  const referenceId = matchingTransaction.reference_id || deposit.transactionId || uniqueCode;
+  const referenceAmount = Number(matchingTransaction.amount || deposit.amount || deposit.originalAmount);
+  const transactionKey = `${referenceId}_${referenceAmount}`;
+
+  if (deposit.status === 'processing') {
+    logger.info(`Transaction ${transactionKey} sedang diproses, skip duplikasi checker.`);
+    return false;
+  }
+
+  deposit.status = 'processing';
+
+  try {
+    await dbRunAsync('BEGIN IMMEDIATE TRANSACTION');
+    await ensureUserExists(deposit.userId);
+
+    const existing = await dbGetAsync(
+      'SELECT id FROM transactions WHERE reference_id = ? AND amount = ?',
+      [referenceId, deposit.originalAmount]
+    );
+
+    if (existing) {
+      await dbRunAsync('ROLLBACK');
+      deposit.status = 'paid';
+      logger.info(`Transaction ${transactionKey} already processed, skipping...`);
+      return false;
+    }
+
+    const updateResult = await dbRunAsync(
+      'UPDATE users SET saldo = saldo + ? WHERE user_id = ?',
+      [deposit.originalAmount, deposit.userId]
+    );
+
+    if (!updateResult.changes) {
+      throw new Error(`User ${deposit.userId} tidak ditemukan saat update saldo.`);
+    }
+
+    await dbRunAsync(
+      'INSERT INTO transactions (user_id, amount, type, reference_id, timestamp) VALUES (?, ?, ?, ?, ?)',
+      [deposit.userId, deposit.originalAmount, 'deposit', referenceId, Date.now()]
+    );
+
+    const user = await dbGetAsync('SELECT saldo FROM users WHERE user_id = ?', [deposit.userId]);
+    if (!user) {
+      throw new Error(`Gagal mengambil saldo terbaru user ${deposit.userId}.`);
+    }
+
+    await dbRunAsync('COMMIT');
+
+    global.processedTransactions.add(transactionKey);
+    deposit.status = 'paid';
+    delete global.pendingDeposits[uniqueCode];
+    db.run('DELETE FROM pending_deposits WHERE unique_code = ?', [uniqueCode]);
+
+    const notificationSent = await sendPaymentSuccessNotification(
+      deposit.userId,
+      deposit,
+      user.saldo
+    );
+
+    if (!notificationSent) {
+      logger.warn(`Notifikasi pembayaran user ${deposit.userId} gagal dikirim, tapi saldo sudah masuk.`);
+    }
+
+    if (deposit.qrMessageId) {
+      try {
+        await bot.telegram.deleteMessage(deposit.chatId || deposit.userId, deposit.qrMessageId);
+      } catch (e) {
+        logger.error("Gagal menghapus pesan QR code:", e.message);
+      }
+    }
+
+    try {
+      let userInfo;
+      try {
+        userInfo = await bot.telegram.getChat(deposit.userId);
+      } catch (e) {
+        userInfo = {};
+      }
+      const username = userInfo.username ? `@${userInfo.username}` : (userInfo.first_name || deposit.userId);
+      const userDisplay = userInfo.username
+        ? `${username} (${deposit.userId})`
+        : `${username}`;
+      await bot.telegram.sendMessage(
+        GROUP_ID,
+        `<blockquote>
+✅ <b>Top Up Berhasil</b>
+👤 User: ${userDisplay}
+💰 Nominal: <b>Rp ${deposit.originalAmount}</b>
+💳 Saldo Sekarang: <b>Rp ${user.saldo}</b>
+⏰ Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}
+</blockquote>`,
+        { parse_mode: 'HTML' }
+      );
+    } catch (e) {
+      logger.error('Gagal kirim notif top up ke grup:', e.message);
+    }
+
+    try {
+      const receiptsDir = path.join(__dirname, 'receipts');
+      if (fs.existsSync(receiptsDir)) {
+        const files = fs.readdirSync(receiptsDir);
+        for (const file of files) {
+          fs.unlinkSync(path.join(receiptsDir, file));
+        }
+      }
+    } catch (e) {
+      logger.error('Gagal menghapus file di receipts:', e.message);
+    }
+
+    return true;
+  } catch (error) {
+    deposit.status = 'pending';
+    try {
+      await dbRunAsync('ROLLBACK');
+    } catch {}
+    logger.error('Error processing payment match:', error.message);
+    throw error;
   }
 }
 
